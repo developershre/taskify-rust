@@ -90,7 +90,12 @@ pub fn DropdownMenuTrigger(props: DropdownMenuTriggerProps) -> Element {
 
             disabled: props.disabled,
 
-            onclick: move |_| {
+            onmousedown: move |e| {
+                e.stop_propagation();
+            },
+
+            onclick: move |e| {
+                e.stop_propagation();
                 let current = (menu.open)();
                 menu.open.set(!current);
             },
@@ -168,12 +173,32 @@ pub fn DropdownMenuContent(props: DropdownMenuContentProps) -> Element {
     );
 
     rsx! {
+        // Transparent backdrop to close dropdown on clicking outside
+        div {
+            class: "fixed inset-0 z-40 bg-transparent",
+
+            onmousedown: move |e| {
+                e.stop_propagation();
+                let mut menu = menu;
+                menu.open.set(false);
+            },
+
+            onclick: move |e| {
+                e.stop_propagation();
+                let mut menu = menu;
+                menu.open.set(false);
+            },
+        }
+
         div {
             "data-slot": "dropdown-menu-content",
 
             class: classes,
 
-            // Prevent clicks inside menu from bubbling
+            onmousedown: move |event| {
+                event.stop_propagation();
+            },
+
             onclick: move |event| {
                 event.stop_propagation();
             },
@@ -290,6 +315,7 @@ pub struct DropdownMenuItemProps {
     #[props(default)]
     pub class: String,
 
+    #[props(default)]
     pub onclick: Option<EventHandler<MouseEvent>>,
 
     pub children: Element,
@@ -323,20 +349,23 @@ pub fn DropdownMenuItem(props: DropdownMenuItemProps) -> Element {
         flex
         w-full
 
-        cursor-default
+        cursor-pointer
         items-center
 
         gap-1.5
 
         rounded-md
 
-        px-1.5
-        py-1
+        px-2
+        py-1.5
 
-        text-sm
+        text-xs
 
         outline-none
         select-none
+
+        hover:bg-accent
+        hover:text-accent-foreground
 
         {}
 
@@ -364,7 +393,12 @@ pub fn DropdownMenuItem(props: DropdownMenuItemProps) -> Element {
 
             disabled: props.disabled,
 
+            onmousedown: move |e| {
+                e.stop_propagation();
+            },
+
             onclick: move |event| {
+                event.stop_propagation();
                 if let Some(handler) = &props.onclick {
                     handler.call(event);
                 }

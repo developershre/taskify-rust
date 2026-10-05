@@ -59,26 +59,54 @@ pub fn CommandDialog(mut props: CommandDialogProps) -> Element {
         return rsx! {};
     }
 
+    let top_class = if props.class.contains("top-") {
+        ""
+    } else {
+        "top-2 "
+    };
+
     let class = format!(
-        "fixed left-1/2 top-1/3 z-50 w-full max-w-lg \
+        "fixed left-1/2 {top_class}z-50 w-full max-w-xl \
          -translate-x-1/2 overflow-hidden rounded-xl \
-         border bg-popover p-0 shadow-lg {}",
+         border bg-popover p-0 shadow-2xl {}",
         props.class
     );
 
     rsx! {
+        // Backdrop - clicking or pressing outside closes the command dialog
         div {
-            class: "fixed inset-0 z-40 bg-black/50",
+            class: "fixed inset-0 z-40 bg-black/40 backdrop-blur-[1px]",
 
-            onclick: move |_| {
+            onmousedown: move |e| {
+                e.stop_propagation();
+                props.open.set(false);
+            },
+
+            onclick: move |e| {
+                e.stop_propagation();
                 props.open.set(false);
             },
         }
 
+        // Dialog container
         div {
             class: class,
             role: "dialog",
             "aria-modal": "true",
+
+            onmousedown: move |e| {
+                e.stop_propagation();
+            },
+
+            onclick: move |e| {
+                e.stop_propagation();
+            },
+
+            onkeydown: move |e| {
+                if e.key() == Key::Escape {
+                    props.open.set(false);
+                }
+            },
 
             div {
                 class: "sr-only",
@@ -111,6 +139,7 @@ pub struct CommandInputProps {
 
     pub value: Signal<String>,
 
+    #[props(default)]
     pub oninput: Option<EventHandler<FormEvent>>,
 }
 
@@ -143,6 +172,7 @@ pub fn CommandInput(mut props: CommandInputProps) -> Element {
                     class: class,
                     value: props.value.read().clone(),
                     placeholder: props.placeholder.clone(),
+                    autofocus: true,
 
                     oninput: move |event| {
                         props.value.set(event.value().clone());
@@ -292,15 +322,17 @@ pub struct CommandItemProps {
 
     pub children: Element,
 
+    #[props(default)]
     pub onclick: Option<EventHandler<MouseEvent>>,
 }
 
 #[component]
 pub fn CommandItem(props: CommandItemProps) -> Element {
     let mut class = String::from(
-        "group/command-item relative flex cursor-default \
-         items-center gap-2 rounded-sm px-2 py-1.5 \
-         text-sm outline-none select-none \
+        "group/command-item relative flex cursor-pointer \
+         items-center gap-2 rounded-md px-2 py-1.5 \
+         text-sm outline-none select-none hover:bg-muted \
+         transition-colors \
          [&_svg]:pointer-events-none \
          [&_svg]:shrink-0 \
          [&_svg:not([class*='size-'])]:size-4",

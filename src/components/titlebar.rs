@@ -1,9 +1,7 @@
 use dioxus::prelude::*;
 
-use crate::components::ui::{
-    Input, InputGroup, InputGroupAddon, InputGroupAddonPosition, InputGroupControl,
-};
-use crate::icons::{CloseIcon, MaximizeIcon, MinimizeIcon, SearchIcon};
+use crate::components::title_search::TitleSearch;
+use crate::icons::{CloseIcon, MaximizeIcon, MinimizeIcon};
 
 #[component]
 pub fn TitleBar() -> Element {
@@ -18,17 +16,12 @@ pub fn TitleBar() -> Element {
         div {
             class: "
                 w-screen
-                h-12
                 flex
                 items-center
                 p-2
                 select-none
                 bg-background
             ",
-
-            // ============================================================
-            // Logo
-            // ============================================================
             div {
                 class: "
                     flex
@@ -40,10 +33,12 @@ pub fn TitleBar() -> Element {
 
                 img {
                     src: asset!("/assets/logo.png"),
-                    class: "size-4 pointer-events-none",
+                    class: "size-6 pointer-events-none",
                 }
             }
-
+            div {
+                class: "",
+            }
             // ============================================================
             // Draggable Area
             // ============================================================
@@ -61,48 +56,18 @@ pub fn TitleBar() -> Element {
                     drag_window.drag();
                 },
 
-                // Search itself does NOT trigger dragging
-                div {
-                    class: "titlebar-search w-full max-w-md",
-
-                    InputGroup {
-                        InputGroupAddon {
-                            position: InputGroupAddonPosition::InlineStart,
-
-                            SearchIcon {
-                                class: "size-4",
-                            },
-                        }
-
-                        InputGroupControl {
-                            Input {
-                                class: "
-                                    h-6
-                                    rounded-none
-                                    border-0
-                                    bg-transparent
-                                    px-2
-                                    shadow-none
-                                    focus-visible:ring-0
-                                "
-                                .to_string(),
-
-                                placeholder: "Search...".to_string(),
-                            }
-                        }
-                    }
-                }
+                TitleSearch{},
             }
 
             // ============================================================
             // Window Controls
             // ============================================================
             div {
-                class: "flex items-center",
+                class: "flex items-center gap-2",
 
                 // Minimize
                 button {
-                    class: "p-2",
+                    class: "p-2 hover:bg-gray-100 rounded-sm",
 
                     onclick: move |_| {
                         minimize_window.window.set_minimized(true);
@@ -115,7 +80,7 @@ pub fn TitleBar() -> Element {
 
                 // Maximize
                 button {
-                    class: "p-2",
+                    class: "p-2 hover:bg-gray-100 rounded-sm",
                     onclick: move |_| {
                         maximize_window.toggle_maximized();
                     },
@@ -127,14 +92,14 @@ pub fn TitleBar() -> Element {
 
                 // Close
                 button {
-                    class: "p-2",
+                    class: "p-2 hover:bg-red-500 hover:text-white rounded-sm",
 
                     onclick: move |_| {
                         close_window.close();
                     },
 
                     CloseIcon {
-                        size: "24".to_string(),
+                        class: "size-3".to_string(),
                     }
                 }
             }

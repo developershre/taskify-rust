@@ -19,12 +19,12 @@ use views::Home;
 
 mod components;
 mod icons;
-mod menus;
+pub mod state;
 mod views;
 
 #[derive(Debug, Clone, Routable, PartialEq)]
 #[rustfmt::skip]
-enum Route {
+pub enum Route {
     #[layout(TitleBar)]
     #[route("/")]
     Home {},
@@ -36,7 +36,7 @@ const TAILWIND_CSS: Asset = asset!("/assets/tailwind.css");
 fn main() {
     dioxus::LaunchBuilder::desktop()
         .with_cfg(
-            Config::new().with_menu(menus::create_menu()).with_window(
+            Config::new().with_window(
                 WindowBuilder::new()
                     .with_title("Taskify")
                     .with_decorations(false)
@@ -48,7 +48,9 @@ fn main() {
 
 #[component]
 fn App() -> Element {
-    use_muda_event_handler(|event| match event.id().0.as_str() {
+    let mut app_state = state::use_init_app_state();
+
+    use_muda_event_handler(move |event| match event.id().0.as_str() {
         "file.new" => println!("Action: New Task (Ctrl+N)"),
         "file.open" => println!("Action: Open File (Ctrl+O)"),
         "file.save" => println!("Action: Save (Ctrl+S)"),
@@ -58,6 +60,7 @@ fn App() -> Element {
         "edit.redo" => println!("Action: Redo (Ctrl+Y)"),
         "view.zoom_in" => println!("Action: Zoom In (Ctrl++)"),
         "view.zoom_out" => println!("Action: Zoom Out (Ctrl+-)"),
+        "view.toggle_theme" => app_state.toggle_theme(),
         _ => {}
     });
 

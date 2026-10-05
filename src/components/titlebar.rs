@@ -5,7 +5,8 @@ use crate::components::ui::{
     DropdownMenuShortcut, DropdownMenuTrigger,
 };
 use crate::components::{SearchContext, TitleSearch};
-use crate::icons::{CloseIcon, MaximizeIcon, MinimizeIcon};
+use crate::icons::{CloseIcon, MaximizeIcon, MinimizeIcon, MoonIcon, SunIcon};
+use crate::state::{use_app_state, ThemeMode};
 
 #[component]
 pub fn TitleBar() -> Element {
@@ -18,7 +19,8 @@ pub fn TitleBar() -> Element {
     let exit_window = desktop.clone();
     let max_window = desktop.clone();
 
-    let mut search_open = use_signal(|| false);
+    let mut app_state = use_app_state();
+    let mut search_open = app_state.search_open;
     use_context_provider(|| SearchContext { open: search_open });
 
     // Register all application keyboard shortcuts
@@ -77,6 +79,9 @@ pub fn TitleBar() -> Element {
                     } else if (key === 'y') {
                         e.preventDefault();
                         dioxus.send('edit.redo');
+                    } else if (key === 't') {
+                        e.preventDefault();
+                        dioxus.send('theme.toggle');
                     } else if (e.key === '=' || e.key === '+') {
                         e.preventDefault();
                         dioxus.send('view.zoom_in');
@@ -99,6 +104,9 @@ pub fn TitleBar() -> Element {
                     }
                     "escape" => {
                         search_open.set(false);
+                    }
+                    "theme.toggle" => {
+                        app_state.toggle_theme();
                     }
                     "window.close" => {
                         win.close();
@@ -136,16 +144,15 @@ pub fn TitleBar() -> Element {
         });
     });
 
+    let is_dark = app_state.is_dark();
+    let theme_root_class = if is_dark { "dark" } else { "" };
+
     rsx! {
         div {
-            class: "
-                w-screen
-                flex
-                items-center
-                p-2
-                select-none
-                bg-background
-            ",
+            class: "{theme_root_class} flex flex-col h-screen w-screen overflow-hidden bg-background text-foreground select-none",
+
+            header {
+                class: "w-full flex items-center p-2 bg-background border-b border-border/40 shrink-0",
             // ============================================================
             // Logo
             // ============================================================
@@ -270,6 +277,26 @@ pub fn TitleBar() -> Element {
                             span { "Toggle Maximize" }
                             DropdownMenuShortcut { "F11" }
                         }
+                        DropdownMenuSeparator {}
+                        DropdownMenuItem {
+                            onclick: move |_| app_state.set_theme(ThemeMode::Dark),
+                            span { "Dark Theme" }
+                            if is_dark {
+                                span { class: "ml-auto text-xs text-primary font-bold", "✓" }
+                            }
+                        }
+                        DropdownMenuItem {
+                            onclick: move |_| app_state.set_theme(ThemeMode::Light),
+                            span { "Light Theme" }
+                            if !is_dark {
+                                span { class: "ml-auto text-xs text-primary font-bold", "✓" }
+                            }
+                        }
+                        DropdownMenuItem {
+                            onclick: move |_| app_state.toggle_theme(),
+                            span { "Toggle Theme" }
+                            DropdownMenuShortcut { "Ctrl+T" }
+                        }
                     }
                 }
 
@@ -314,14 +341,28 @@ pub fn TitleBar() -> Element {
             }
 
             // ============================================================
-            // Window Controls
+            // Window Controls & Theme Toggle
             // ============================================================
             div {
-                class: "flex items-center gap-2",
+                class: "flex items-center gap-1.5",
+
+                // Theme Quick Toggle
+                button {
+                    class: "p-1.5 hover:bg-accent text-muted-foreground hover:text-foreground rounded-md transition-colors cursor-pointer mr-0.5",
+                    title: if is_dark { "Switch to Light Theme (Ctrl+T)" } else { "Switch to Dark Theme (Ctrl+T)" },
+                    onclick: move |_| {
+                        app_state.toggle_theme();
+                    },
+                    if is_dark {
+                        SunIcon { class: "size-3.5".to_string() }
+                    } else {
+                        MoonIcon { class: "size-3.5".to_string() }
+                    }
+                }
 
                 // Minimize
                 button {
-                    class: "p-2 hover:bg-gray-100 rounded-sm",
+                    class: "p-2 hover:bg-accent text-muted-foreground hover:text-foreground rounded-sm cursor-pointer transition-colors",
 
                     onclick: move |_| {
                         minimize_window.window.set_minimized(true);
@@ -334,7 +375,7 @@ pub fn TitleBar() -> Element {
 
                 // Maximize
                 button {
-                    class: "p-2 hover:bg-gray-100 rounded-sm",
+                    class: "p-2 hover:bg-accent text-muted-foreground hover:text-foreground rounded-sm cursor-pointer transition-colors",
                     onclick: move |_| {
                         maximize_window.toggle_maximized();
                     },
@@ -346,7 +387,7 @@ pub fn TitleBar() -> Element {
 
                 // Close
                 button {
-                    class: "p-2 hover:bg-red-500 hover:text-white rounded-sm",
+                    class: "p-2 hover:bg-destructive hover:text-white rounded-sm cursor-pointer transition-colors",
 
                     onclick: move |_| {
                         close_window.close();
@@ -358,5 +399,12 @@ pub fn TitleBar() -> Element {
                 }
             }
         }
+
+            main {
+                class: "flex-1 overflow-hidden flex select-text",
+                Outlet::<crate::Route> {}
+            }
+        }
     }
 }
+

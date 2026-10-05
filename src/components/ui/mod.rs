@@ -1,6 +1,8 @@
 pub mod input;
-pub mod input_group;
+#[allow(unused_imports)]
+pub use input::Input;
 
+pub mod input_group;
 #[allow(unused_imports)]
 pub use input_group::{
     InputGroup, InputGroupAddon, InputGroupAddonPosition, InputGroupButton, InputGroupControl,
@@ -8,7 +10,6 @@ pub use input_group::{
 };
 
 pub mod dropdown_menu;
-
 #[allow(unused_imports)]
 pub use dropdown_menu::{
     DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuGroup,
@@ -18,9 +19,70 @@ pub use dropdown_menu::{
 };
 
 pub mod command;
-
 #[allow(unused_imports)]
 pub use command::{
     Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList,
     CommandSeparator, CommandShortcut,
 };
+
+// ============================================================
+// Shadcn Replicated UI Components
+// ============================================================
+
+pub mod dialog;
+#[allow(unused_imports)]
+pub use dialog::{
+    Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader,
+    DialogTitle, DialogTrigger,
+};
+
+pub mod sidebar;
+#[allow(unused_imports)]
+pub use sidebar::{
+    Sidebar, SidebarCollapsible, SidebarContent, SidebarFooter, SidebarGroup,
+    SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuAction,
+    SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarRail,
+    SidebarSeparator, SidebarTrigger,
+};
+
+pub mod avatar;
+#[allow(unused_imports)]
+pub use avatar::{Avatar, AvatarFallback, AvatarImage};
+
+pub mod calendar;
+#[allow(unused_imports)]
+pub use calendar::Calendar;
+
+pub mod select;
+#[allow(unused_imports)]
+pub use select::{
+    Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator,
+    SelectTrigger, SelectValue,
+};
+
+pub mod item;
+#[allow(unused_imports)]
+pub use item::{Item, ItemActions, ItemContent, ItemDescription, ItemMedia, ItemTitle};
+
+pub mod tooltip;
+#[allow(unused_imports)]
+pub use tooltip::{Tooltip, TooltipContent, TooltipProvider, TooltipTrigger};
+
+pub mod switch;
+#[allow(unused_imports)]
+pub use switch::Switch;
+
+pub mod breadcrumb;
+#[allow(unused_imports)]
+pub use breadcrumb::{
+    Breadcrumb, BreadcrumbEllipsis, BreadcrumbItem, BreadcrumbLink, BreadcrumbList,
+    BreadcrumbPage, BreadcrumbSeparator,
+};
+
+pub mod badge;
+#[allow(unused_imports)]
+pub use badge::Badge;
+
+pub mod collapsible;
+#[allow(unused_imports)]
+pub use collapsible::{Collapsible, CollapsibleContent, CollapsibleTrigger};

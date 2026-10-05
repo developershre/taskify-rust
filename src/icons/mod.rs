@@ -9,3 +9,9 @@ pub use minimize::MinimizeIcon;
 
 mod search;
 pub use search::SearchIcon;
+
+mod sun;
+pub use sun::SunIcon;
+
+mod moon;
+pub use moon::MoonIcon;

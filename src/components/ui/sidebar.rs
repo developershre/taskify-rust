@@ -77,10 +77,7 @@ pub fn SidebarProvider(props: SidebarProviderProps) -> Element {
         div {
             "data-slot": "sidebar-wrapper",
             "data-state": if is_open { "expanded" } else { "collapsed" },
-            class: format!(
-                "group/sidebar-wrapper flex h-full w-full overflow-hidden {}",
-                props.class
-            ),
+            class: format!("group/sidebar-wrapper flex h-full w-full overflow-hidden {}", props.class),
             {props.children}
         }
     }
@@ -107,10 +104,10 @@ pub fn Sidebar(props: SidebarProps) -> Element {
     let is_open = ctx.is_open();
 
     let width_class = match (props.collapsible, is_open) {
-        (SidebarCollapsible::None, _) => "w-64",
-        (SidebarCollapsible::Offcanvas, true) => "w-64",
+        (SidebarCollapsible::None, _) => "w-60 sm:w-64",
+        (SidebarCollapsible::Offcanvas, true) => "w-60 sm:w-64",
         (SidebarCollapsible::Offcanvas, false) => "w-0 -ml-64",
-        (SidebarCollapsible::Icon, true) => "w-64",
+        (SidebarCollapsible::Icon, true) => "w-60 sm:w-64",
         (SidebarCollapsible::Icon, false) => "w-12",
     };
 
@@ -122,8 +119,8 @@ pub fn Sidebar(props: SidebarProps) -> Element {
     };
 
     let class = format!(
-        "group/sidebar peer relative flex h-full flex-col border-r border-sidebar-border bg-sidebar \
-         text-sidebar-foreground transition-[width] duration-200 ease-linear shrink-0 overflow-hidden \
+        "group group/sidebar peer relative flex h-full flex-col bg-sidebar \
+         text-sidebar-foreground shrink-0 overflow-hidden \
          {} {}",
         width_class, props.class
     );
@@ -133,7 +130,7 @@ pub fn Sidebar(props: SidebarProps) -> Element {
             "data-slot": "sidebar",
             "data-state": state_str,
             "data-collapsible": if !is_open { collapsible_str } else { "" },
-            class: class,
+            class,
             {props.children}
         }
     }
@@ -170,11 +167,7 @@ pub fn SidebarHeader(props: SidebarHeaderProps) -> Element {
     );
 
     rsx! {
-        div {
-            "data-slot": "sidebar-header",
-            class: class,
-            {props.children}
-        }
+        div { "data-slot": "sidebar-header", class, {props.children} }
     }
 }
 
@@ -204,11 +197,7 @@ pub fn SidebarContent(props: SidebarContentProps) -> Element {
     );
 
     rsx! {
-        div {
-            "data-slot": "sidebar-content",
-            class: class,
-            {props.children}
-        }
+        div { "data-slot": "sidebar-content", class, {props.children} }
     }
 }
 
@@ -229,11 +218,7 @@ pub fn SidebarGroup(props: SidebarGroupProps) -> Element {
     let class = format!("relative flex flex-col w-full min-w-0 p-0 py-1 {}", props.class);
 
     rsx! {
-        div {
-            "data-slot": "sidebar-group",
-            class: class,
-            {props.children}
-        }
+        div { "data-slot": "sidebar-group", class, {props.children} }
     }
 }
 
@@ -258,16 +243,12 @@ pub fn SidebarGroupLabel(props: SidebarGroupLabelProps) -> Element {
 
     let class = format!(
         "flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-semibold uppercase tracking-wider \
-         text-sidebar-foreground/70 outline-none select-none transition-opacity duration-200 {}",
+         text-sidebar-foreground/70 outline-none select-none {}",
         props.class
     );
 
     rsx! {
-        div {
-            "data-slot": "sidebar-group-label",
-            class: class,
-            {props.children}
-        }
+        div { "data-slot": "sidebar-group-label", class, {props.children} }
     }
 }
 
@@ -288,11 +269,7 @@ pub fn SidebarGroupContent(props: SidebarGroupContentProps) -> Element {
     let class = format!("w-full text-sm {}", props.class);
 
     rsx! {
-        div {
-            "data-slot": "sidebar-group-content",
-            class: class,
-            {props.children}
-        }
+        div { "data-slot": "sidebar-group-content", class, {props.children} }
     }
 }
 
@@ -313,11 +290,7 @@ pub fn SidebarMenu(props: SidebarMenuProps) -> Element {
     let class = format!("flex w-full min-w-0 flex-col gap-1 list-none p-0 m-0 {}", props.class);
 
     rsx! {
-        ul {
-            "data-slot": "sidebar-menu",
-            class: class,
-            {props.children}
-        }
+        ul { "data-slot": "sidebar-menu", class, {props.children} }
     }
 }
 
@@ -338,11 +311,7 @@ pub fn SidebarMenuItem(props: SidebarMenuItemProps) -> Element {
     let class = format!("group/menu-item relative list-none flex flex-col {}", props.class);
 
     rsx! {
-        li {
-            "data-slot": "sidebar-menu-item",
-            class: class,
-            {props.children}
-        }
+        li { "data-slot": "sidebar-menu-item", class, {props.children} }
     }
 }
 
@@ -402,7 +371,7 @@ pub fn SidebarMenuButton(props: SidebarMenuButtonProps) -> Element {
         )
     };
 
-    let click_handler = props.onclick.clone();
+    let click_handler = props.onclick;
 
     let button_element = rsx! {
         button {
@@ -425,13 +394,8 @@ pub fn SidebarMenuButton(props: SidebarMenuButtonProps) -> Element {
         if let Some(tooltip_text) = props.tooltip {
             return rsx! {
                 Tooltip {
-                    TooltipTrigger {
-                        {button_element}
-                    }
-                    TooltipContent {
-                        side: "right".to_string(),
-                        "{tooltip_text}"
-                    }
+                    TooltipTrigger { {button_element} }
+                    TooltipContent { side: "right".to_string(), "{tooltip_text}" }
                 }
             };
         }
@@ -466,11 +430,7 @@ pub fn SidebarMenuBadge(props: SidebarMenuBadgeProps) -> Element {
     );
 
     rsx! {
-        div {
-            "data-slot": "sidebar-menu-badge",
-            class: class,
-            {props.children}
-        }
+        div { "data-slot": "sidebar-menu-badge", class, {props.children} }
     }
 }
 
@@ -516,7 +476,7 @@ pub fn SidebarMenuAction(props: SidebarMenuActionProps) -> Element {
         button {
             "data-slot": "sidebar-menu-action",
             r#type: "button",
-            class: class,
+            class,
             onclick: move |e| {
                 if let Some(h) = &props.onclick {
                     h.call(e);
@@ -549,10 +509,7 @@ pub fn SidebarSeparator(props: SidebarSeparatorProps) -> Element {
     );
 
     rsx! {
-        div {
-            "data-slot": "sidebar-separator",
-            class: class,
-        }
+        div { "data-slot": "sidebar-separator", class }
     }
 }
 
@@ -587,11 +544,7 @@ pub fn SidebarFooter(props: SidebarFooterProps) -> Element {
     );
 
     rsx! {
-        div {
-            "data-slot": "sidebar-footer",
-            class: class,
-            {props.children}
-        }
+        div { "data-slot": "sidebar-footer", class, {props.children} }
     }
 }
 
@@ -620,7 +573,7 @@ pub fn SidebarTrigger(props: SidebarTriggerProps) -> Element {
         button {
             "data-slot": "sidebar-trigger",
             r#type: "button",
-            class: class,
+            class,
             onclick: move |_| {
                 ctx.toggle();
             },
@@ -632,7 +585,13 @@ pub fn SidebarTrigger(props: SidebarTriggerProps) -> Element {
                 stroke_width: "2",
                 stroke_linecap: "round",
                 stroke_linejoin: "round",
-                rect { width: "18", height: "18", x: "3", y: "3", rx: "2" }
+                rect {
+                    width: "18",
+                    height: "18",
+                    x: "3",
+                    y: "3",
+                    rx: "2",
+                }
                 path { d: "M9 3v18" }
             }
             span { class: "sr-only", "Toggle Sidebar" }
@@ -662,12 +621,102 @@ pub fn SidebarRail(props: SidebarRailProps) -> Element {
             r#type: "button",
             class: format!(
                 "absolute inset-y-0 right-0 z-20 hidden w-1 -mr-0.5 cursor-ew-resize \
-                 hover:bg-sidebar-border transition-colors sm:flex {}",
-                props.class
+                         hover:bg-sidebar-border transition-colors sm:flex {}",
+                props.class,
             ),
             onclick: move |_| {
                 ctx.toggle();
             },
+        }
+    }
+}
+
+// ============================================================
+// Sidebar Menu Sub (for nested collapsible trees)
+// ============================================================
+
+#[derive(Props, Clone, PartialEq)]
+pub struct SidebarMenuSubProps {
+    #[props(default)]
+    pub class: String,
+    pub children: Element,
+}
+
+#[component]
+pub fn SidebarMenuSub(props: SidebarMenuSubProps) -> Element {
+    let ctx = use_context::<SidebarContext>();
+    let is_open = ctx.is_open();
+
+    if !is_open {
+        return rsx! {};
+    }
+
+    rsx! {
+        ul {
+            "data-slot": "sidebar-menu-sub",
+            class: format!(
+                "mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 border-l border-sidebar-border/60 px-2.5 py-0.5 group-data-[collapsible=icon]:hidden {}",
+                props.class,
+            ),
+            {props.children}
+        }
+    }
+}
+
+#[derive(Props, Clone, PartialEq)]
+pub struct SidebarMenuSubItemProps {
+    #[props(default)]
+    pub class: String,
+    pub children: Element,
+}
+
+#[component]
+pub fn SidebarMenuSubItem(props: SidebarMenuSubItemProps) -> Element {
+    rsx! {
+        li {
+            "data-slot": "sidebar-menu-sub-item",
+            class: format!("relative {}", props.class),
+            {props.children}
+        }
+    }
+}
+
+#[derive(Props, Clone, PartialEq)]
+pub struct SidebarMenuSubButtonProps {
+    #[props(default = false)]
+    pub active: bool,
+    #[props(default)]
+    pub class: String,
+    #[props(default)]
+    pub onclick: Option<EventHandler<MouseEvent>>,
+    pub children: Element,
+}
+
+#[component]
+pub fn SidebarMenuSubButton(props: SidebarMenuSubButtonProps) -> Element {
+    let active_class = if props.active {
+        "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+    } else {
+        "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+    };
+
+    let class = format!(
+        "flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 text-xs outline-none cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-sidebar-ring disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 {} {}",
+        active_class, props.class
+    );
+
+    rsx! {
+        button {
+            "data-slot": "sidebar-menu-sub-button",
+            "data-active": if props.active { "true" } else { "false" },
+            r#type: "button",
+            class,
+            onclick: move |e| {
+                if let Some(h) = &props.onclick {
+                    h.call(e);
+                }
+            },
+            {props.children}
         }
     }
 }

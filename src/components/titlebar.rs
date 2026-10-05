@@ -10,15 +10,6 @@ use crate::state::{use_app_state, ThemeMode};
 
 #[component]
 pub fn TitleBar() -> Element {
-    let desktop = dioxus::desktop::window();
-
-    let minimize_window = desktop.clone();
-    let maximize_window = desktop.clone();
-    let close_window = desktop.clone();
-    let drag_window = desktop.clone();
-    let exit_window = desktop.clone();
-    let max_window = desktop.clone();
-
     let mut app_state = use_app_state();
     let mut search_open = app_state.search_open;
     use_context_provider(|| SearchContext { open: search_open });
@@ -82,6 +73,9 @@ pub fn TitleBar() -> Element {
                     } else if (key === 't') {
                         e.preventDefault();
                         dioxus.send('theme.toggle');
+                    } else if (key === 'b') {
+                        e.preventDefault();
+                        dioxus.send('sidebar.toggle');
                     } else if (e.key === '=' || e.key === '+') {
                         e.preventDefault();
                         dioxus.send('view.zoom_in');
@@ -91,7 +85,7 @@ pub fn TitleBar() -> Element {
                     }
                 }
             });
-            "#,
+            "#
         );
 
         spawn(async move {
@@ -107,6 +101,9 @@ pub fn TitleBar() -> Element {
                     }
                     "theme.toggle" => {
                         app_state.toggle_theme();
+                    }
+                    "sidebar.toggle" => {
+                        app_state.toggle_sidebar();
                     }
                     "window.close" => {
                         win.close();
@@ -209,7 +206,7 @@ pub fn TitleBar() -> Element {
                         DropdownMenuSeparator {}
                         DropdownMenuItem {
                             variant: "destructive".to_string(),
-                            onclick: move |_| exit_window.close(),
+                            onclick: move |_| dioxus::desktop::window().close(),
                             span { "Exit" }
                             DropdownMenuShortcut { "Ctrl+Q" }
                         }
@@ -273,7 +270,7 @@ pub fn TitleBar() -> Element {
                         }
                         DropdownMenuSeparator {}
                         DropdownMenuItem {
-                            onclick: move |_| max_window.toggle_maximized(),
+                            onclick: move |_| dioxus::desktop::window().toggle_maximized(),
                             span { "Toggle Maximize" }
                             DropdownMenuShortcut { "F11" }
                         }
@@ -334,7 +331,7 @@ pub fn TitleBar() -> Element {
                 ",
 
                 onmousedown: move |_| {
-                    drag_window.drag();
+                    dioxus::desktop::window().drag();
                 },
 
                 TitleSearch{},
@@ -365,7 +362,7 @@ pub fn TitleBar() -> Element {
                     class: "p-2 hover:bg-accent text-muted-foreground hover:text-foreground rounded-sm cursor-pointer transition-colors",
 
                     onclick: move |_| {
-                        minimize_window.window.set_minimized(true);
+                        dioxus::desktop::window().window.set_minimized(true);
                     },
 
                     MinimizeIcon {
@@ -377,7 +374,7 @@ pub fn TitleBar() -> Element {
                 button {
                     class: "p-2 hover:bg-accent text-muted-foreground hover:text-foreground rounded-sm cursor-pointer transition-colors",
                     onclick: move |_| {
-                        maximize_window.toggle_maximized();
+                        dioxus::desktop::window().toggle_maximized();
                     },
 
                     MaximizeIcon {
@@ -390,7 +387,7 @@ pub fn TitleBar() -> Element {
                     class: "p-2 hover:bg-destructive hover:text-white rounded-sm cursor-pointer transition-colors",
 
                     onclick: move |_| {
-                        close_window.close();
+                        dioxus::desktop::window().close();
                     },
 
                     CloseIcon {

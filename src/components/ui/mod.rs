@@ -41,8 +41,8 @@ pub mod sidebar;
 pub use sidebar::{
     Sidebar, SidebarCollapsible, SidebarContent, SidebarFooter, SidebarGroup,
     SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuAction,
-    SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarRail,
-    SidebarSeparator, SidebarTrigger,
+    SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton,
+    SidebarMenuSubItem, SidebarProvider, SidebarRail, SidebarSeparator, SidebarTrigger,
 };
 
 pub mod avatar;

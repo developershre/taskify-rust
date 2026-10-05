@@ -148,7 +148,7 @@ pub fn CollapsibleContent(props: CollapsibleContentProps) -> Element {
             "data-slot": "collapsible-content",
             "data-state": state_str,
             class: format!(
-                "overflow-hidden transition-all duration-200 ease-in-out {} {}",
+                "overflow-hidden {} {}",
                 hidden_class, props.class
             ),
             {props.children}

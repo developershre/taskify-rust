@@ -114,7 +114,7 @@ pub fn AppSidebar() -> Element {
                                     CollapsibleTrigger { class: "w-full",
                                         SidebarMenuButton { tooltip: "Tasks".to_string(),
                                             svg {
-                                                class: "size-4 text-muted-foreground",
+                                                class: "w-full size-4 text-muted-foreground",
                                                 view_box: "0 0 24 24",
                                                 fill: "none",
                                                 stroke: "currentColor",
@@ -140,9 +140,10 @@ pub fn AppSidebar() -> Element {
                                         }
                                     }
                                     CollapsibleContent {
-                                        SidebarMenuSub { class: "border-l border-zinc-700/60 dark:border-zinc-700/60 light:border-zinc-300 ml-4.5 pl-3 py-1 flex flex-col gap-1",
+                                        SidebarMenuSub { class: "w-full border-l border-zinc-700/60 dark:border-zinc-700/60 light:border-zinc-300 ml-4.5 pl-3 py-1 flex flex-col gap-1",
                                             SidebarMenuSubItem {
                                                 SidebarMenuSubButton {
+                                                    class: "w-full",
                                                     active: *app_state.selected_project.read() == "All Tasks",
                                                     onclick: move |_| {
                                                         app_state.active_nav.set("tasks".to_string());

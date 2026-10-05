@@ -6,9 +6,17 @@ use crate::components::ui::{
 };
 use crate::icons::SearchIcon;
 
+#[derive(Clone, Copy, PartialEq)]
+pub struct SearchContext {
+    pub open: Signal<bool>,
+}
+
 #[component]
 pub fn TitleSearch() -> Element {
-    let mut open = use_signal(|| false);
+    let mut open = match try_use_context::<SearchContext>() {
+        Some(ctx) => ctx.open,
+        None => use_signal(|| false),
+    };
     let mut search = use_signal(String::new);
 
     let query = search().to_lowercase();
@@ -38,6 +46,11 @@ pub fn TitleSearch() -> Element {
         .collect();
 
     let has_results = !filtered_nav.is_empty() || !filtered_actions.is_empty();
+
+    let first_match = filtered_nav
+        .first()
+        .map(|(n, _)| *n)
+        .or_else(|| filtered_actions.first().map(|(n, _)| *n));
 
     rsx! {
         div {
@@ -85,6 +98,17 @@ pub fn TitleSearch() -> Element {
                     CommandInput {
                         placeholder: "Type a command or search...".to_string(),
                         value: search,
+                        onkeydown: move |e: KeyboardEvent| {
+                            if e.key() == Key::Enter {
+                                if let Some(item) = first_match {
+                                    println!("Action executed: {item}");
+                                    open.set(false);
+                                    search.write().clear();
+                                }
+                            } else if e.key() == Key::Escape {
+                                open.set(false);
+                            }
+                        },
                     }
 
                     CommandList {
@@ -101,6 +125,7 @@ pub fn TitleSearch() -> Element {
                                     CommandItem {
                                         key: "{name}",
                                         onclick: move |_| {
+                                            println!("Action executed: {name}");
                                             open.set(false);
                                             search.write().clear();
                                         },
@@ -118,6 +143,7 @@ pub fn TitleSearch() -> Element {
                                     CommandItem {
                                         key: "{name}",
                                         onclick: move |_| {
+                                            println!("Action executed: {name}");
                                             open.set(false);
                                             search.write().clear();
                                         },

@@ -141,6 +141,9 @@ pub struct CommandInputProps {
 
     #[props(default)]
     pub oninput: Option<EventHandler<FormEvent>>,
+
+    #[props(default)]
+    pub onkeydown: Option<EventHandler<KeyboardEvent>>,
 }
 
 #[component]
@@ -178,6 +181,12 @@ pub fn CommandInput(mut props: CommandInputProps) -> Element {
                         props.value.set(event.value().clone());
 
                         if let Some(handler) = &props.oninput {
+                            handler.call(event);
+                        }
+                    },
+
+                    onkeydown: move |event| {
+                        if let Some(handler) = &props.onkeydown {
                             handler.call(event);
                         }
                     },

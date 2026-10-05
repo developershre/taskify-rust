@@ -49,9 +49,15 @@ fn main() {
 #[component]
 fn App() -> Element {
     use_muda_event_handler(|event| match event.id().0.as_str() {
-        "file.new" => println!("File > New"),
-        "file.open" => println!("File > Open"),
-        "file.save" => println!("File > Save"),
+        "file.new" => println!("Action: New Task (Ctrl+N)"),
+        "file.open" => println!("Action: Open File (Ctrl+O)"),
+        "file.save" => println!("Action: Save (Ctrl+S)"),
+        "file.save_as" => println!("Action: Save As (Ctrl+A)"),
+        "file.exit" => std::process::exit(0),
+        "edit.undo" => println!("Action: Undo (Ctrl+Z)"),
+        "edit.redo" => println!("Action: Redo (Ctrl+Y)"),
+        "view.zoom_in" => println!("Action: Zoom In (Ctrl++)"),
+        "view.zoom_out" => println!("Action: Zoom Out (Ctrl+-)"),
         _ => {}
     });
 

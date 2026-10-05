@@ -4,7 +4,7 @@ use crate::components::ui::{
     DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator,
     DropdownMenuShortcut, DropdownMenuTrigger,
 };
-use crate::components::TitleSearch;
+use crate::components::{SearchContext, TitleSearch};
 use crate::icons::{CloseIcon, MaximizeIcon, MinimizeIcon};
 
 #[component]
@@ -17,6 +17,124 @@ pub fn TitleBar() -> Element {
     let drag_window = desktop.clone();
     let exit_window = desktop.clone();
     let max_window = desktop.clone();
+
+    let mut search_open = use_signal(|| false);
+    use_context_provider(|| SearchContext { open: search_open });
+
+    // Register all application keyboard shortcuts
+    use_effect(move || {
+        let mut eval = document::eval(
+            r#"
+            window.addEventListener('keydown', (e) => {
+                const isInput = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable;
+                const isCtrlOrMeta = e.ctrlKey || e.metaKey;
+
+                // Ctrl+K / Cmd+K: Always toggle search palette
+                if (isCtrlOrMeta && e.key.toLowerCase() === 'k') {
+                    e.preventDefault();
+                    dioxus.send('search.toggle');
+                    return;
+                }
+
+                // Escape: Always close palettes/menus
+                if (e.key === 'Escape') {
+                    dioxus.send('escape');
+                    return;
+                }
+
+                // F11: Toggle maximize
+                if (e.key === 'F11') {
+                    e.preventDefault();
+                    dioxus.send('window.toggle_maximize');
+                    return;
+                }
+
+                // Ctrl+Q: Exit app
+                if (isCtrlOrMeta && e.key.toLowerCase() === 'q') {
+                    e.preventDefault();
+                    dioxus.send('window.close');
+                    return;
+                }
+
+                // Other shortcuts when not typing in an input
+                if (isCtrlOrMeta && !isInput) {
+                    const key = e.key.toLowerCase();
+                    if (key === 'n') {
+                        e.preventDefault();
+                        dioxus.send('file.new');
+                    } else if (key === 'o') {
+                        e.preventDefault();
+                        dioxus.send('file.open');
+                    } else if (key === 's') {
+                        e.preventDefault();
+                        dioxus.send('file.save');
+                    } else if (key === 'a') {
+                        e.preventDefault();
+                        dioxus.send('file.save_as');
+                    } else if (key === 'z') {
+                        e.preventDefault();
+                        dioxus.send('edit.undo');
+                    } else if (key === 'y') {
+                        e.preventDefault();
+                        dioxus.send('edit.redo');
+                    } else if (e.key === '=' || e.key === '+') {
+                        e.preventDefault();
+                        dioxus.send('view.zoom_in');
+                    } else if (e.key === '-') {
+                        e.preventDefault();
+                        dioxus.send('view.zoom_out');
+                    }
+                }
+            });
+            "#,
+        );
+
+        spawn(async move {
+            let win = dioxus::desktop::window();
+            while let Ok(msg) = eval.recv::<String>().await {
+                match msg.as_str() {
+                    "search.toggle" => {
+                        let current = *search_open.read();
+                        search_open.set(!current);
+                    }
+                    "escape" => {
+                        search_open.set(false);
+                    }
+                    "window.close" => {
+                        win.close();
+                    }
+                    "window.toggle_maximize" => {
+                        win.toggle_maximized();
+                    }
+                    "file.new" => {
+                        println!("Action: New Task (Ctrl+N)");
+                    }
+                    "file.open" => {
+                        println!("Action: Open File (Ctrl+O)");
+                    }
+                    "file.save" => {
+                        println!("Action: Save (Ctrl+S)");
+                    }
+                    "file.save_as" => {
+                        println!("Action: Save As (Ctrl+A)");
+                    }
+                    "edit.undo" => {
+                        println!("Action: Undo (Ctrl+Z)");
+                    }
+                    "edit.redo" => {
+                        println!("Action: Redo (Ctrl+Y)");
+                    }
+                    "view.zoom_in" => {
+                        println!("Action: Zoom In (Ctrl++)");
+                    }
+                    "view.zoom_out" => {
+                        println!("Action: Zoom Out (Ctrl+-)");
+                    }
+                    _ => {}
+                }
+            }
+        });
+    });
 
     rsx! {
         div {

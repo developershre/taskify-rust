@@ -277,7 +277,9 @@ fn initial_tasks() -> Vec<TaskItem> {
         TaskItem {
             id: "task-1".to_string(),
             title: "Replicate shadcn sidebar & calendar".to_string(),
-            description: "Build custom calendar sidebar, collapsible menus with tree guides and actions.".to_string(),
+            description:
+                "Build custom calendar sidebar, collapsible menus with tree guides and actions."
+                    .to_string(),
             project: "UI Components".to_string(),
             priority: TaskPriority::Urgent,
             completed: false,
@@ -286,7 +288,9 @@ fn initial_tasks() -> Vec<TaskItem> {
         TaskItem {
             id: "task-2".to_string(),
             title: "Follow system theme dynamically".to_string(),
-            description: "Default to system theme without forcing black theme, and allow user customization.".to_string(),
+            description:
+                "Default to system theme without forcing black theme, and allow user customization."
+                    .to_string(),
             project: "Rust Desktop".to_string(),
             priority: TaskPriority::High,
             completed: true,
@@ -295,7 +299,9 @@ fn initial_tasks() -> Vec<TaskItem> {
         TaskItem {
             id: "task-3".to_string(),
             title: "Collapsible icon sidebar with tooltips".to_string(),
-            description: "Shrink sidebar to 48px, hide labels & badges, and show rich hover tooltips.".to_string(),
+            description:
+                "Shrink sidebar to 48px, hide labels & badges, and show rich hover tooltips."
+                    .to_string(),
             project: "UI Components".to_string(),
             priority: TaskPriority::High,
             completed: true,
@@ -304,7 +310,9 @@ fn initial_tasks() -> Vec<TaskItem> {
         TaskItem {
             id: "task-4".to_string(),
             title: "Release v1.0 desktop binary".to_string(),
-            description: "Package production application with custom frameless window and system tray.".to_string(),
+            description:
+                "Package production application with custom frameless window and system tray."
+                    .to_string(),
             project: "Release v1.0".to_string(),
             priority: TaskPriority::Medium,
             completed: false,
@@ -428,7 +436,7 @@ pub fn use_init_app_state() -> AppState {
             } catch (e) {
                 dioxus.send(JSON.stringify({ mode: 'system', system_dark: false }));
             }
-            "#
+            "#,
         );
 
         spawn(async move {
@@ -452,7 +460,7 @@ pub fn use_init_app_state() -> AppState {
                 const now = new Date();
                 dioxus.send(`${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`);
             } catch (e) {}
-            "#
+            "#,
         );
 
         spawn(async move {

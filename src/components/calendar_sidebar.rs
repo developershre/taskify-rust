@@ -1,6 +1,6 @@
-use dioxus::prelude::*;
 use crate::components::ui::Calendar;
 use crate::state::use_app_state;
+use dioxus::prelude::*;
 
 #[derive(Props, Clone, PartialEq)]
 pub struct CalendarSidebarProps {
@@ -21,6 +21,21 @@ pub fn CalendarSidebar(props: CalendarSidebarProps) -> Element {
     // Active action menu id
     let mut active_action_id = use_signal(|| Option::<String>::None);
 
+    let action_menu_anchor = active_action_id;
+    use_effect(move || {
+        if let Some(id) = action_menu_anchor.read().clone() {
+            super::ui::popup::position_popup(
+                &format!("note-{id}"),
+                "[data-popup-anchor]",
+                "[data-popup-trigger]",
+                "bottom",
+                "end",
+                6,
+                false,
+            );
+        }
+    });
+
     if !is_open {
         return rsx! {};
     }
@@ -30,7 +45,7 @@ pub fn CalendarSidebar(props: CalendarSidebarProps) -> Element {
     rsx! {
         aside {
             class: format!(
-                "w-72 sm:w-80 shrink-0 rounded-2xl border border-border/40 bg-card p-4 flex flex-col h-full overflow-y-auto select-none shadow-xs gap-5 transition-all duration-300 {}",
+                "w-60 sm:w-72 shrink-0 rounded-2xl border border-border/40 bg-card p-4 flex flex-col h-full overflow-y-auto select-none shadow-xs gap-5 transition-all duration-300 {}",
                 props.class,
             ),
 
@@ -149,6 +164,7 @@ pub fn CalendarSidebar(props: CalendarSidebarProps) -> Element {
                             rsx! {
                                 div {
                                     key: "{note.id}",
+                                    "data-popup-anchor": "true",
                                     class: "relative rounded-xl p-3.5 bg-card/60 hover:bg-card border border-border/50 hover:border-border transition-colors flex items-center justify-between gap-3 shadow-2xs group",
 
                                     // Action Dropdown Menu
@@ -158,9 +174,10 @@ pub fn CalendarSidebar(props: CalendarSidebarProps) -> Element {
                                             "{note.description}"
                                         }
                                     }
-        
+
                                     button {
                                         r#type: "button",
+                                        "data-popup-trigger": "true",
                                         class: "px-2.5 py-1 text-xs rounded-md bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium shrink-0 cursor-pointer border border-border/30 transition-colors shadow-2xs",
                                         onclick: {
                                             let nid = note.id.clone();
@@ -174,26 +191,29 @@ pub fn CalendarSidebar(props: CalendarSidebarProps) -> Element {
                                         },
                                         "Actions"
                                     }
-        
+
                                     if is_menu_open {
-                                        div { class: "absolute right-3 top-10 z-30 w-28 rounded-lg border border-border bg-popover text-popover-foreground shadow-md p-1 flex flex-col gap-0.5 animate-in fade-in-50 zoom-in-95",
-                                            button {
-                                                class: "w-full text-left px-2 py-1 text-xs rounded hover:bg-muted text-foreground transition-colors cursor-pointer",
-                                                onclick: move |_| {
-                                                    active_action_id.set(None);
-                                                },
-                                                "View"
-                                            }
-                                            button {
-                                                class: "w-full text-left px-2 py-1 text-xs rounded hover:bg-destructive/10 text-destructive transition-colors cursor-pointer",
-                                                onclick: {
-                                                    let nid = note.id.clone();
-                                                    move |_| {
-                                                        app_state.delete_note(&nid);
+                                        div { "data-popup": format!("note-{}", note.id),
+                                            class: "fixed left-0 top-0 z-50 invisible",
+                                            div { class: "w-28 rounded-lg border border-border bg-popover text-popover-foreground shadow-md p-1 flex flex-col gap-0.5 animate-in fade-in-50 zoom-in-95",
+                                                button {
+                                                    class: "w-full text-left px-2 py-1 text-xs rounded hover:bg-muted text-foreground transition-colors cursor-pointer",
+                                                    onclick: move |_| {
                                                         active_action_id.set(None);
-                                                    }
-                                                },
-                                                "Delete"
+                                                    },
+                                                    "View"
+                                                }
+                                                button {
+                                                    class: "w-full text-left px-2 py-1 text-xs rounded hover:bg-destructive/10 text-destructive transition-colors cursor-pointer",
+                                                    onclick: {
+                                                        let nid = note.id.clone();
+                                                        move |_| {
+                                                            app_state.delete_note(&nid);
+                                                            active_action_id.set(None);
+                                                        }
+                                                    },
+                                                    "Delete"
+                                                }
                                             }
                                         }
                                     }

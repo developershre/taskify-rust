@@ -172,13 +172,30 @@ pub struct SelectContentProps {
 #[component]
 pub fn SelectContent(props: SelectContentProps) -> Element {
     let mut ctx = use_context::<SelectContext>();
+    let uid = use_hook(super::popup::next_popup_id);
+    let open = ctx.open;
+    let effect_uid = uid.clone();
+
+    use_effect(move || {
+        if open() {
+            super::popup::position_popup(
+                &effect_uid,
+                "[data-slot=\"select\"]",
+                "[data-slot=\"select-trigger\"]",
+                "bottom",
+                "start",
+                4,
+                true,
+            );
+        }
+    });
 
     if !*ctx.open.read() {
         return rsx! {};
     }
 
     let class = format!(
-        "absolute left-0 top-full z-50 mt-1 max-h-60 w-full min-w-[8rem] \
+        "w-full min-w-[8rem] max-h-60 \
          overflow-y-auto overflow-x-hidden rounded-md border border-border \
          bg-popover p-1 text-popover-foreground shadow-md outline-none \
          animate-in fade-in-0 zoom-in-95 {}",
@@ -200,15 +217,20 @@ pub fn SelectContent(props: SelectContentProps) -> Element {
         }
 
         div {
-            "data-slot": "select-content",
-            class: class,
-            onmousedown: move |e| {
-                e.stop_propagation();
-            },
-            onclick: move |e| {
-                e.stop_propagation();
-            },
-            {props.children}
+            "data-popup": uid,
+            class: "fixed left-0 top-0 z-50 invisible",
+
+            div {
+                "data-slot": "select-content",
+                class: class,
+                onmousedown: move |e| {
+                    e.stop_propagation();
+                },
+                onclick: move |e| {
+                    e.stop_propagation();
+                },
+                {props.children}
+            }
         }
     }
 }

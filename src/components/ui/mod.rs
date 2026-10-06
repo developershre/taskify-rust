@@ -1,3 +1,5 @@
+pub(crate) mod popup;
+
 pub mod input;
 #[allow(unused_imports)]
 pub use input::Input;

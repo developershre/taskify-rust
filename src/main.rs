@@ -14,8 +14,8 @@ fn load_window_icon() -> Option<Icon> {
     Icon::from_rgba(image.into_raw(), width, height).ok()
 }
 
-use components::TitleBar;
-use views::Home;
+use components::{AppFrame, TitleBar};
+use views::{Home, PlaceholderPage};
 
 mod components;
 mod icons;
@@ -26,8 +26,43 @@ mod views;
 #[rustfmt::skip]
 pub enum Route {
     #[layout(TitleBar)]
+    #[layout(AppFrame)]
     #[route("/")]
     Home {},
+
+    #[route("/tasks", PlaceholderPage)]
+    Tasks {},
+    #[route("/tasks/all", PlaceholderPage)]
+    TasksAll {},
+    #[route("/tasks/archived", PlaceholderPage)]
+    TasksArchived {},
+    #[route("/tasks/urgent", PlaceholderPage)]
+    TasksUrgent {},
+
+    #[route("/projects", PlaceholderPage)]
+    Projects {},
+    #[route("/projects/personal", PlaceholderPage)]
+    ProjectsPersonal {},
+    #[route("/projects/github", PlaceholderPage)]
+    ProjectsGithub {},
+
+    #[route("/calendar", PlaceholderPage)]
+    Calendar {},
+
+    #[route("/chat", PlaceholderPage)]
+    Chat {},
+    #[route("/chat/messaging", PlaceholderPage)]
+    ChatMessaging {},
+    #[route("/chat/mail", PlaceholderPage)]
+    ChatMail {},
+    #[route("/chat/issues", PlaceholderPage)]
+    ChatIssues {},
+
+    #[route("/analytics", PlaceholderPage)]
+    Analytics {},
+
+    #[route("/mcp", PlaceholderPage)]
+    Mcp {},
 }
 
 const FAVICON: Asset = asset!("/assets/favicon.ico");

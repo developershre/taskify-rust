@@ -113,31 +113,47 @@ pub struct TooltipContentProps {
 #[component]
 pub fn TooltipContent(props: TooltipContentProps) -> Element {
     let ctx = use_context::<TooltipContext>();
+    let uid = use_hook(super::popup::next_popup_id);
+    let open = ctx.open;
+    let side = props.side.clone();
+    let effect_uid = uid.clone();
+
+    use_effect(move || {
+        if open() {
+            super::popup::position_popup(
+                &effect_uid,
+                "[data-slot=\"tooltip\"]",
+                "[data-slot=\"tooltip-trigger\"]",
+                &side,
+                "center",
+                6,
+                false,
+            );
+        }
+    });
 
     if !*ctx.open.read() {
         return rsx! {};
     }
 
-    let pos_class = match props.side.as_str() {
-        "bottom" => "top-full left-1/2 -translate-x-1/2 mt-1.5",
-        "left" => "right-full top-1/2 -translate-y-1/2 mr-1.5",
-        "right" => "left-full top-1/2 -translate-y-1/2 ml-1.5",
-        _ => "bottom-full left-1/2 -translate-x-1/2 mb-1.5",
-    };
-
     let class = format!(
-        "absolute z-50 overflow-hidden rounded-md bg-primary px-3 py-1.5 text-xs \
+        "overflow-hidden rounded-md bg-primary px-3 py-1.5 text-xs \
          text-primary-foreground shadow-md animate-in fade-in-0 zoom-in-95 pointer-events-none \
-         whitespace-nowrap select-none {} {}",
-        pos_class, props.class
+         whitespace-nowrap select-none {}",
+        props.class
     );
 
     rsx! {
         div {
-            "data-slot": "tooltip-content",
-            role: "tooltip",
-            class: class,
-            {props.children}
+            "data-popup": uid,
+            class: "fixed left-0 top-0 z-50 invisible pointer-events-none",
+
+            div {
+                "data-slot": "tooltip-content",
+                role: "tooltip",
+                class: class,
+                {props.children}
+            }
         }
     }
 }

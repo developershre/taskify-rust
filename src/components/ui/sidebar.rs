@@ -1,5 +1,5 @@
-use dioxus::prelude::*;
 use crate::components::ui::tooltip::{Tooltip, TooltipContent, TooltipTrigger};
+use dioxus::prelude::*;
 
 // ============================================================
 // Collapsible Modes
@@ -104,10 +104,10 @@ pub fn Sidebar(props: SidebarProps) -> Element {
     let is_open = ctx.is_open();
 
     let width_class = match (props.collapsible, is_open) {
-        (SidebarCollapsible::None, _) => "w-60 sm:w-64",
-        (SidebarCollapsible::Offcanvas, true) => "w-60 sm:w-64",
-        (SidebarCollapsible::Offcanvas, false) => "w-0 -ml-64",
-        (SidebarCollapsible::Icon, true) => "w-60 sm:w-64",
+        (SidebarCollapsible::None, _) => "w-52 sm:w-60",
+        (SidebarCollapsible::Offcanvas, true) => "w-52 sm:w-60",
+        (SidebarCollapsible::Offcanvas, false) => "w-0 -ml-60",
+        (SidebarCollapsible::Icon, true) => "w-52 sm:w-60",
         (SidebarCollapsible::Icon, false) => "w-12",
     };
 
@@ -154,9 +154,9 @@ pub fn SidebarHeader(props: SidebarHeaderProps) -> Element {
     let is_open = ctx.is_open();
 
     let layout_class = if is_open {
-        "flex h-14 items-center justify-between px-3"
+        "w-full flex h-14 items-center justify-between px-3"
     } else {
-        "flex h-14 items-center justify-center p-2 [&_.sidebar-text]:hidden"
+        "w-full flex h-14 items-center justify-center p-2 [&_.sidebar-text]:hidden"
     };
 
     let class = format!(
@@ -215,7 +215,10 @@ pub struct SidebarGroupProps {
 
 #[component]
 pub fn SidebarGroup(props: SidebarGroupProps) -> Element {
-    let class = format!("relative flex flex-col w-full min-w-0 p-0 py-1 {}", props.class);
+    let class = format!(
+        "relative flex flex-col w-full min-w-0 p-0 py-1 {}",
+        props.class
+    );
 
     rsx! {
         div { "data-slot": "sidebar-group", class, {props.children} }
@@ -287,7 +290,10 @@ pub struct SidebarMenuProps {
 
 #[component]
 pub fn SidebarMenu(props: SidebarMenuProps) -> Element {
-    let class = format!("flex w-full min-w-0 flex-col gap-1 list-none p-0 m-0 {}", props.class);
+    let class = format!(
+        "flex w-full min-w-0 flex-col gap-1 list-none p-0 m-0 {}",
+        props.class
+    );
 
     rsx! {
         ul { "data-slot": "sidebar-menu", class, {props.children} }
@@ -308,7 +314,10 @@ pub struct SidebarMenuItemProps {
 
 #[component]
 pub fn SidebarMenuItem(props: SidebarMenuItemProps) -> Element {
-    let class = format!("group/menu-item relative list-none flex flex-col {}", props.class);
+    let class = format!(
+        "group/menu-item relative list-none flex flex-col {}",
+        props.class
+    );
 
     rsx! {
         li { "data-slot": "sidebar-menu-item", class, {props.children} }

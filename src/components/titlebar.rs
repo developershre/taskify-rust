@@ -85,7 +85,7 @@ pub fn TitleBar() -> Element {
                     }
                 }
             });
-            "#
+            "#,
         );
 
         spawn(async move {
@@ -404,4 +404,3 @@ pub fn TitleBar() -> Element {
         }
     }
 }
-

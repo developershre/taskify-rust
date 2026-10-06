@@ -129,6 +129,26 @@ pub struct DropdownMenuContentProps {
 #[component]
 pub fn DropdownMenuContent(props: DropdownMenuContentProps) -> Element {
     let menu = use_context::<DropdownMenuContext>();
+    let uid = use_hook(super::popup::next_popup_id);
+    let open = menu.open;
+    let side = props.side.clone();
+    let align = props.align.clone();
+    let offset = props.side_offset;
+    let effect_uid = uid.clone();
+
+    use_effect(move || {
+        if open() {
+            super::popup::position_popup(
+                &effect_uid,
+                "[data-slot=\"dropdown-menu\"]",
+                "[data-slot=\"dropdown-menu-trigger\"]",
+                &side,
+                &align,
+                offset,
+                false,
+            );
+        }
+    });
 
     if !(menu.open)() {
         return rsx! {};
@@ -136,11 +156,7 @@ pub fn DropdownMenuContent(props: DropdownMenuContentProps) -> Element {
 
     let classes = format!(
         "
-        absolute
-        z-50
-
         min-w-32
-        max-h-[var(--available-height)]
 
         overflow-x-hidden
         overflow-y-auto
@@ -165,10 +181,7 @@ pub fn DropdownMenuContent(props: DropdownMenuContentProps) -> Element {
         zoom-in-95
 
         {}
-
-        {}
         ",
-        position_class(&props.align, &props.side),
         props.class
     );
 
@@ -191,43 +204,25 @@ pub fn DropdownMenuContent(props: DropdownMenuContentProps) -> Element {
         }
 
         div {
-            "data-slot": "dropdown-menu-content",
+            "data-popup": uid,
+            class: "fixed left-0 top-0 z-50 invisible",
 
-            class: classes,
+            div {
+                "data-slot": "dropdown-menu-content",
 
-            onmousedown: move |event| {
-                event.stop_propagation();
-            },
+                class: classes,
 
-            onclick: move |event| {
-                event.stop_propagation();
-            },
+                onmousedown: move |event| {
+                    event.stop_propagation();
+                },
 
-            {props.children}
+                onclick: move |event| {
+                    event.stop_propagation();
+                },
+
+                {props.children}
+            }
         }
-    }
-}
-
-#[allow(dead_code)]
-fn position_class(align: &str, side: &str) -> &'static str {
-    match (side, align) {
-        ("bottom", "start") => "left-0 top-full mt-1",
-        ("bottom", "center") => "left-1/2 top-full mt-1 -translate-x-1/2",
-        ("bottom", "end") => "right-0 top-full mt-1",
-
-        ("top", "start") => "bottom-full left-0 mb-1",
-        ("top", "center") => "bottom-full left-1/2 mb-1 -translate-x-1/2",
-        ("top", "end") => "bottom-full right-0 mb-1",
-
-        ("right", "start") => "left-full top-0 ml-1",
-        ("right", "center") => "left-full top-1/2 ml-1 -translate-y-1/2",
-        ("right", "end") => "left-full bottom-0 ml-1",
-
-        ("left", "start") => "right-full top-0 mr-1",
-        ("left", "center") => "right-full top-1/2 mr-1 -translate-y-1/2",
-        ("left", "end") => "right-full bottom-0 mr-1",
-
-        _ => "left-0 top-full mt-1",
     }
 }
 

@@ -2,57 +2,25 @@ use dioxus::prelude::*;
 
 use crate::components::ui::{
     Avatar, AvatarFallback, AvatarImage, Collapsible, CollapsibleContent, CollapsibleTrigger,
-    Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader,
-    SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton,
-    SidebarMenuSubItem, SidebarRail,
+    Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarMenu,
+    SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem,
+    SidebarRail,
 };
 use crate::state::use_app_state;
+
+use crate::components::sidebar::SidebarHeaderComponent;
+use crate::icons::{CodeIcon, GamepadIcon, LayoutIcon};
 
 #[component]
 pub fn AppSidebar() -> Element {
     let mut app_state = use_app_state();
+    let router = router();
 
     rsx! {
-        Sidebar { class: "border-0 bg-transparent shrink-0",
+        Sidebar { class: "border-0 shrink-0 bg-transparent",
 
             // 1. Team Switcher Header: Acme Inc / Enterprise
-            SidebarHeader { class: "p-0 pb-2",
-                div { class: "w-full flex items-center gap-3 p-1.5 rounded-lg hover:bg-sidebar-accent/50 cursor-pointer transition-colors group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0",
-                    // Squircle Icon with drawer/box
-                    div { class: "flex size-9 items-center justify-center rounded-xl bg-zinc-950 dark:bg-zinc-900 text-white shrink-0 shadow-sm border border-zinc-800",
-                        svg {
-                            class: "size-4 text-zinc-200",
-                            view_box: "0 0 24 24",
-                            fill: "none",
-                            stroke: "currentColor",
-                            stroke_width: "2",
-                            rect {
-                                width: "18",
-                                height: "18",
-                                x: "3",
-                                y: "3",
-                                rx: "3",
-                            }
-                            path { d: "M7 8h10M7 12h10M7 16h10" }
-                        }
-                    }
-                    div { class: "sidebar-text flex flex-col min-w-0 flex-1 text-left leading-tight",
-                        span { class: "font-semibold text-xs text-foreground truncate tracking-tight",
-                            "Acme Inc"
-                        }
-                        span { class: "text-[10px] text-muted-foreground truncate", "Enterprise" }
-                    }
-                    // Chevrons Up/Down
-                    svg {
-                        class: "sidebar-text size-3.5 text-muted-foreground/60 shrink-0 ml-auto",
-                        view_box: "0 0 24 24",
-                        fill: "none",
-                        stroke: "currentColor",
-                        stroke_width: "2",
-                        path { d: "m7 15 5 5 5-5M7 9l5-5 5 5" }
-                    }
-                }
-            }
+            SidebarHeaderComponent {  }
 
             // 2. Main Navigation Menu
             SidebarContent { class: "gap-1 pt-1",
@@ -66,68 +34,22 @@ pub fn AppSidebar() -> Element {
                                     active: *app_state.active_nav.read() == "dashboard",
                                     onclick: move |_| {
                                         app_state.active_nav.set("dashboard".to_string());
+                                        let _ = router.push("/");
                                     },
-                                    svg {
-                                        class: "size-4 text-muted-foreground",
-                                        view_box: "0 0 24 24",
-                                        fill: "none",
-                                        stroke: "currentColor",
-                                        stroke_width: "2",
-                                        rect {
-                                            width: "7",
-                                            height: "7",
-                                            x: "3",
-                                            y: "3",
-                                            rx: "1.5",
-                                        }
-                                        rect {
-                                            width: "7",
-                                            height: "7",
-                                            x: "14",
-                                            y: "3",
-                                            rx: "1.5",
-                                        }
-                                        rect {
-                                            width: "7",
-                                            height: "7",
-                                            x: "14",
-                                            y: "14",
-                                            rx: "1.5",
-                                        }
-                                        rect {
-                                            width: "7",
-                                            height: "7",
-                                            x: "3",
-                                            y: "14",
-                                            rx: "1.5",
-                                        }
-                                    }
+                                    LayoutIcon { class: "size-4 text-muted-foreground" },
                                     span { "Dashboard" }
                                 }
                             }
 
                             // 2.2 Tasks (Collapsible)
-                            Collapsible {
-                                default_open: true,
-                                class: "group/tasks w-full",
-                                SidebarMenuItem {
+                            SidebarMenuItem {
+                                Collapsible {
+                                    default_open: true,
+                                    class: "group/tasks w-full",
+
                                     CollapsibleTrigger { class: "w-full",
                                         SidebarMenuButton { tooltip: "Tasks".to_string(),
-                                            svg {
-                                                class: "w-full size-4 text-muted-foreground",
-                                                view_box: "0 0 24 24",
-                                                fill: "none",
-                                                stroke: "currentColor",
-                                                stroke_width: "2",
-                                                rect {
-                                                    width: "18",
-                                                    height: "18",
-                                                    x: "3",
-                                                    y: "3",
-                                                    rx: "2",
-                                                }
-                                                path { d: "M8 12h8" }
-                                            }
+                                            CodeIcon{}
                                             span { "Tasks" }
                                             svg {
                                                 class: "ml-auto size-3.5 text-muted-foreground/60 group-data-[state=open]/tasks:rotate-90 group-data-[collapsible=icon]:hidden",
@@ -140,34 +62,45 @@ pub fn AppSidebar() -> Element {
                                         }
                                     }
                                     CollapsibleContent {
-                                        SidebarMenuSub { class: "w-full border-l border-zinc-700/60 dark:border-zinc-700/60 light:border-zinc-300 ml-4.5 pl-3 py-1 flex flex-col gap-1",
+                                        SidebarMenuSub { class: "border-l border-zinc-700/60 dark:border-zinc-700/60 light:border-zinc-300 ml-4.5 pl-3 py-1 flex flex-col gap-1",
                                             SidebarMenuSubItem {
                                                 SidebarMenuSubButton {
                                                     class: "w-full",
-                                                    active: *app_state.selected_project.read() == "All Tasks",
+                                                    active: *app_state.active_nav.read() == "tasks"
+                                                        && *app_state.selected_project.read()
+                                                            == "All Tasks",
                                                     onclick: move |_| {
                                                         app_state.active_nav.set("tasks".to_string());
                                                         app_state.selected_project.set("All Tasks".to_string());
+                                                        let _ = router.push("/tasks/all");
                                                     },
                                                     span { "All Tasks" }
                                                 }
                                             }
                                             SidebarMenuSubItem {
                                                 SidebarMenuSubButton {
-                                                    active: *app_state.selected_project.read() == "Archived",
+                                                    class: "w-full",
+                                                    active: *app_state.active_nav.read() == "tasks"
+                                                        && *app_state.selected_project.read()
+                                                            == "Archived",
                                                     onclick: move |_| {
                                                         app_state.active_nav.set("tasks".to_string());
                                                         app_state.selected_project.set("Archived".to_string());
+                                                        let _ = router.push("/tasks/archived");
                                                     },
                                                     span { "Archived" }
                                                 }
                                             }
                                             SidebarMenuSubItem {
                                                 SidebarMenuSubButton {
-                                                    active: *app_state.selected_project.read() == "Urgent",
+                                                    class: "w-full",
+                                                    active: *app_state.active_nav.read() == "tasks"
+                                                        && *app_state.selected_project.read()
+                                                            == "Urgent",
                                                     onclick: move |_| {
                                                         app_state.active_nav.set("tasks".to_string());
                                                         app_state.selected_project.set("Urgent".to_string());
+                                                        let _ = router.push("/tasks/urgent");
                                                     },
                                                     span { "Urgent" }
                                                 }
@@ -178,10 +111,11 @@ pub fn AppSidebar() -> Element {
                             }
 
                             // 2.3 Projects (Collapsible)
-                            Collapsible {
-                                default_open: true,
-                                class: "group/projects w-full",
-                                SidebarMenuItem {
+                            SidebarMenuItem {
+                                Collapsible {
+                                    default_open: false,
+                                    class: "group/projects w-full",
+
                                     CollapsibleTrigger { class: "w-full",
                                         SidebarMenuButton { tooltip: "Projects".to_string(),
                                             svg {
@@ -208,30 +142,42 @@ pub fn AppSidebar() -> Element {
                                         SidebarMenuSub { class: "border-l border-zinc-700/60 dark:border-zinc-700/60 light:border-zinc-300 ml-4.5 pl-3 py-1 flex flex-col gap-1",
                                             SidebarMenuSubItem {
                                                 SidebarMenuSubButton {
-                                                    active: *app_state.selected_project.read() == "All Projects",
+                                                    class: "w-full",
+                                                    active: *app_state.active_nav.read() == "projects"
+                                                        && *app_state.selected_project.read()
+                                                            == "All Projects",
                                                     onclick: move |_| {
-                                                        app_state.active_nav.set("dashboard".to_string());
+                                                        app_state.active_nav.set("projects".to_string());
                                                         app_state.selected_project.set("All Projects".to_string());
+                                                        let _ = router.push("/projects");
                                                     },
-                                                    span { "All Porjects" }
+                                                    span { "All Projects" }
                                                 }
                                             }
                                             SidebarMenuSubItem {
                                                 SidebarMenuSubButton {
-                                                    active: *app_state.selected_project.read() == "Personal",
+                                                    class: "w-full",
+                                                    active: *app_state.active_nav.read() == "projects"
+                                                        && *app_state.selected_project.read()
+                                                            == "Personal",
                                                     onclick: move |_| {
-                                                        app_state.active_nav.set("tasks".to_string());
+                                                        app_state.active_nav.set("projects".to_string());
                                                         app_state.selected_project.set("Personal".to_string());
+                                                        let _ = router.push("/projects/personal");
                                                     },
                                                     span { "Personal" }
                                                 }
                                             }
                                             SidebarMenuSubItem {
                                                 SidebarMenuSubButton {
-                                                    active: *app_state.selected_project.read() == "Github Repos",
+                                                    class: "w-full",
+                                                    active: *app_state.active_nav.read() == "projects"
+                                                        && *app_state.selected_project.read()
+                                                            == "Github Repos",
                                                     onclick: move |_| {
-                                                        app_state.active_nav.set("tasks".to_string());
+                                                        app_state.active_nav.set("projects".to_string());
                                                         app_state.selected_project.set("Github Repos".to_string());
+                                                        let _ = router.push("/projects/github");
                                                     },
                                                     span { "Github Repos" }
                                                 }
@@ -251,6 +197,7 @@ pub fn AppSidebar() -> Element {
                                         if !*app_state.calendar_sidebar_open.read() {
                                             app_state.calendar_sidebar_open.set(true);
                                         }
+                                        let _ = router.push("/calendar");
                                     },
                                     svg {
                                         class: "size-4 text-muted-foreground",
@@ -272,10 +219,11 @@ pub fn AppSidebar() -> Element {
                             }
 
                             // 2.5 Chat (Collapsible with active Messaging item)
-                            Collapsible {
-                                default_open: true,
-                                class: "group/chat w-full",
-                                SidebarMenuItem {
+                            SidebarMenuItem {
+                                Collapsible {
+                                    default_open: false,
+                                    class: "group/chat w-full",
+
                                     CollapsibleTrigger { class: "w-full",
                                         SidebarMenuButton { tooltip: "Chat".to_string(),
                                             svg {
@@ -301,28 +249,40 @@ pub fn AppSidebar() -> Element {
                                         SidebarMenuSub { class: "border-l border-zinc-700/60 dark:border-zinc-700/60 light:border-zinc-300 ml-4.5 pl-3 py-1 flex flex-col gap-1",
                                             SidebarMenuSubItem {
                                                 SidebarMenuSubButton {
-                                                    active: true,
-                                                    class: "bg-secondary text-foreground font-medium rounded-lg px-2.5 py-1.5",
+                                                    class: "w-full bg-secondary text-foreground font-medium rounded-lg px-2.5 py-1.5",
+                                                    active: *app_state.active_nav.read() == "chat"
+                                                        && *app_state.selected_project.read()
+                                                            == "Messaging",
                                                     onclick: move |_| {
                                                         app_state.active_nav.set("chat".to_string());
+                                                        app_state.selected_project.set("Messaging".to_string());
+                                                        let _ = router.push("/chat/messaging");
                                                     },
                                                     span { "Messaging" }
                                                 }
                                             }
                                             SidebarMenuSubItem {
                                                 SidebarMenuSubButton {
-                                                    active: false,
+                                                    class: "w-full",
+                                                    active: *app_state.active_nav.read() == "chat"
+                                                        && *app_state.selected_project.read() == "Mail",
                                                     onclick: move |_| {
                                                         app_state.active_nav.set("chat".to_string());
+                                                        app_state.selected_project.set("Mail".to_string());
+                                                        let _ = router.push("/chat/mail");
                                                     },
                                                     span { "Mail" }
                                                 }
                                             }
                                             SidebarMenuSubItem {
                                                 SidebarMenuSubButton {
-                                                    active: false,
+                                                    class: "w-full",
+                                                    active: *app_state.active_nav.read() == "chat"
+                                                        && *app_state.selected_project.read() == "issues",
                                                     onclick: move |_| {
                                                         app_state.active_nav.set("chat".to_string());
+                                                        app_state.selected_project.set("issues".to_string());
+                                                        let _ = router.push("/chat/issues");
                                                     },
                                                     span { "issues" }
                                                 }
@@ -337,7 +297,10 @@ pub fn AppSidebar() -> Element {
                                 SidebarMenuButton {
                                     tooltip: "Analytics".to_string(),
                                     active: *app_state.active_nav.read() == "analytics",
-                                    onclick: move |_| app_state.active_nav.set("analytics".to_string()),
+                                    onclick: move |_| {
+                                        app_state.active_nav.set("analytics".to_string());
+                                        let _ = router.push("/analytics");
+                                    },
                                     svg {
                                         class: "size-4 text-muted-foreground",
                                         view_box: "0 0 24 24",
@@ -356,7 +319,10 @@ pub fn AppSidebar() -> Element {
                                 SidebarMenuButton {
                                     tooltip: "Mcp".to_string(),
                                     active: *app_state.active_nav.read() == "mcp",
-                                    onclick: move |_| app_state.active_nav.set("mcp".to_string()),
+                                    onclick: move |_| {
+                                        app_state.active_nav.set("mcp".to_string());
+                                        let _ = router.push("/mcp");
+                                    },
                                     svg {
                                         class: "size-4 text-muted-foreground",
                                         view_box: "0 0 24 24",
@@ -381,21 +347,7 @@ pub fn AppSidebar() -> Element {
                             SidebarMenu {
                                 SidebarMenuItem {
                                     SidebarMenuButton { tooltip: "Entertainment".to_string(),
-                                        svg {
-                                            class: "size-4 text-muted-foreground",
-                                            view_box: "0 0 24 24",
-                                            fill: "none",
-                                            stroke: "currentColor",
-                                            stroke_width: "2",
-                                            path { d: "M6 12h4m-2-2v4M15 11h.01M18 13h.01" }
-                                            rect {
-                                                width: "20",
-                                                height: "12",
-                                                x: "2",
-                                                y: "6",
-                                                rx: "6",
-                                            }
-                                        }
+                                        GamepadIcon{},
                                         span { "Entertainment" }
                                     }
                                 }

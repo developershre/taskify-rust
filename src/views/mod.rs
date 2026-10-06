@@ -1,5 +1,23 @@
+mod analytics;
+mod calendar;
+mod chat;
+mod empty_state;
 mod home;
-mod placeholder;
+mod mcp;
+mod page_header;
+mod projects;
+mod stat_card;
+mod task_row;
+mod tasks;
 
+pub use analytics::Analytics;
+pub use calendar::Calendar;
+pub use chat::{Chat, ChatIssues, ChatMail, ChatMessaging};
+pub use empty_state::EmptyState;
 pub use home::Home;
-pub use placeholder::PlaceholderPage;
+pub use mcp::Mcp;
+pub use page_header::PageHeader;
+pub use projects::{Projects, ProjectsGithub, ProjectsPersonal};
+pub use stat_card::StatCard;
+pub use task_row::TaskRow;
+pub use tasks::{Tasks, TasksAll, TasksArchived, TasksUrgent};

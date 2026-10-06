@@ -15,7 +15,7 @@ pub struct AvatarProps {
 #[component]
 pub fn Avatar(props: AvatarProps) -> Element {
     let class = format!(
-        "relative flex size-10 shrink-0 overflow-hidden rounded-full {}",
+        "relative flex shrink-0 overflow-hidden rounded-full {}",
         props.class
     );
 

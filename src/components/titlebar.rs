@@ -4,6 +4,7 @@ use crate::components::ui::{
     DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator,
     DropdownMenuShortcut, DropdownMenuTrigger,
 };
+use crate::components::user::User;
 use crate::components::{SearchContext, TitleSearch};
 use crate::icons::{CloseIcon, MaximizeIcon, MinimizeIcon, MoonIcon, SunIcon};
 use crate::state::{use_app_state, ThemeMode};
@@ -342,6 +343,8 @@ pub fn TitleBar() -> Element {
             // ============================================================
             div {
                 class: "flex items-center gap-1.5",
+
+                User{},
 
                 // Theme Quick Toggle
                 button {

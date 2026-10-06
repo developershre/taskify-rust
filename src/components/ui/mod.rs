@@ -34,17 +34,17 @@ pub use command::{
 pub mod dialog;
 #[allow(unused_imports)]
 pub use dialog::{
-    Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader,
-    DialogTitle, DialogTrigger,
+    Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+    DialogTrigger,
 };
 
 pub mod sidebar;
 #[allow(unused_imports)]
 pub use sidebar::{
-    Sidebar, SidebarCollapsible, SidebarContent, SidebarFooter, SidebarGroup,
-    SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuAction,
-    SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton,
-    SidebarMenuSubItem, SidebarProvider, SidebarRail, SidebarSeparator, SidebarTrigger,
+    Sidebar, SidebarCollapsible, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent,
+    SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuAction, SidebarMenuBadge,
+    SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem,
+    SidebarProvider, SidebarRail, SidebarSeparator, SidebarTrigger,
 };
 
 pub mod avatar;
@@ -58,8 +58,8 @@ pub use calendar::Calendar;
 pub mod select;
 #[allow(unused_imports)]
 pub use select::{
-    Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator,
-    SelectTrigger, SelectValue,
+    Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger,
+    SelectValue,
 };
 
 pub mod item;
@@ -77,8 +77,8 @@ pub use switch::Switch;
 pub mod breadcrumb;
 #[allow(unused_imports)]
 pub use breadcrumb::{
-    Breadcrumb, BreadcrumbEllipsis, BreadcrumbItem, BreadcrumbLink, BreadcrumbList,
-    BreadcrumbPage, BreadcrumbSeparator,
+    Breadcrumb, BreadcrumbEllipsis, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage,
+    BreadcrumbSeparator,
 };
 
 pub mod badge;

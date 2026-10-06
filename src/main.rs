@@ -15,7 +15,10 @@ fn load_window_icon() -> Option<Icon> {
 }
 
 use components::{AppFrame, TitleBar};
-use views::{Home, PlaceholderPage};
+use views::{
+    Analytics, Calendar, Chat, ChatIssues, ChatMail, ChatMessaging, Home, Mcp, Projects,
+    ProjectsGithub, ProjectsPersonal, Tasks, TasksAll, TasksArchived, TasksUrgent,
+};
 
 mod components;
 mod icons;
@@ -30,38 +33,38 @@ pub enum Route {
     #[route("/")]
     Home {},
 
-    #[route("/tasks", PlaceholderPage)]
+    #[route("/tasks", Tasks)]
     Tasks {},
-    #[route("/tasks/all", PlaceholderPage)]
+    #[route("/tasks/all", TasksAll)]
     TasksAll {},
-    #[route("/tasks/archived", PlaceholderPage)]
+    #[route("/tasks/archived", TasksArchived)]
     TasksArchived {},
-    #[route("/tasks/urgent", PlaceholderPage)]
+    #[route("/tasks/urgent", TasksUrgent)]
     TasksUrgent {},
 
-    #[route("/projects", PlaceholderPage)]
+    #[route("/projects", Projects)]
     Projects {},
-    #[route("/projects/personal", PlaceholderPage)]
+    #[route("/projects/personal", ProjectsPersonal)]
     ProjectsPersonal {},
-    #[route("/projects/github", PlaceholderPage)]
+    #[route("/projects/github", ProjectsGithub)]
     ProjectsGithub {},
 
-    #[route("/calendar", PlaceholderPage)]
+    #[route("/calendar", Calendar)]
     Calendar {},
 
-    #[route("/chat", PlaceholderPage)]
+    #[route("/chat", Chat)]
     Chat {},
-    #[route("/chat/messaging", PlaceholderPage)]
+    #[route("/chat/messaging", ChatMessaging)]
     ChatMessaging {},
-    #[route("/chat/mail", PlaceholderPage)]
+    #[route("/chat/mail", ChatMail)]
     ChatMail {},
-    #[route("/chat/issues", PlaceholderPage)]
+    #[route("/chat/issues", ChatIssues)]
     ChatIssues {},
 
-    #[route("/analytics", PlaceholderPage)]
+    #[route("/analytics", Analytics)]
     Analytics {},
 
-    #[route("/mcp", PlaceholderPage)]
+    #[route("/mcp", Mcp)]
     Mcp {},
 }
 

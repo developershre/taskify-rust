@@ -71,6 +71,32 @@ impl TaskPriority {
     }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
+pub enum TaskStatus {
+    #[default]
+    Backlog,
+    InProgress,
+    Completed,
+}
+
+impl TaskStatus {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Backlog => "Backlog",
+            Self::InProgress => "In Progress",
+            Self::Completed => "Completed",
+        }
+    }
+
+    pub fn badge_variant(&self) -> &'static str {
+        match self {
+            Self::Backlog => "outline",
+            Self::InProgress => "secondary",
+            Self::Completed => "default",
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct TaskItem {
     pub id: String,
@@ -79,6 +105,7 @@ pub struct TaskItem {
     pub project: String,
     pub priority: TaskPriority,
     pub completed: bool,
+    pub status: TaskStatus,
     pub due_date: Option<(u32, u32, u32)>,
 }
 
@@ -196,6 +223,7 @@ impl AppState {
                 project,
                 priority,
                 completed: false,
+                status: TaskStatus::Backlog,
                 due_date,
             },
         );
@@ -205,6 +233,19 @@ impl AppState {
         let mut list = self.tasks.write();
         if let Some(task) = list.iter_mut().find(|t| t.id == id) {
             task.completed = !task.completed;
+            task.status = if task.completed {
+                TaskStatus::Completed
+            } else {
+                TaskStatus::Backlog
+            };
+        }
+    }
+
+    pub fn set_task_status(&mut self, id: &str, status: TaskStatus) {
+        let mut list = self.tasks.write();
+        if let Some(task) = list.iter_mut().find(|t| t.id == id) {
+            task.status = status;
+            task.completed = status == TaskStatus::Completed;
         }
     }
 
@@ -283,6 +324,7 @@ fn initial_tasks() -> Vec<TaskItem> {
             project: "UI Components".to_string(),
             priority: TaskPriority::Urgent,
             completed: false,
+            status: TaskStatus::InProgress,
             due_date: Some((2024, 9, 10)),
         },
         TaskItem {
@@ -294,6 +336,7 @@ fn initial_tasks() -> Vec<TaskItem> {
             project: "Rust Desktop".to_string(),
             priority: TaskPriority::High,
             completed: true,
+            status: TaskStatus::Completed,
             due_date: Some((2024, 9, 10)),
         },
         TaskItem {
@@ -305,6 +348,7 @@ fn initial_tasks() -> Vec<TaskItem> {
             project: "UI Components".to_string(),
             priority: TaskPriority::High,
             completed: true,
+            status: TaskStatus::Completed,
             due_date: Some((2024, 9, 11)),
         },
         TaskItem {
@@ -316,6 +360,7 @@ fn initial_tasks() -> Vec<TaskItem> {
             project: "Release v1.0".to_string(),
             priority: TaskPriority::Medium,
             completed: false,
+            status: TaskStatus::Backlog,
             due_date: Some((2024, 9, 15)),
         },
     ]

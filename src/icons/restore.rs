@@ -1,13 +1,13 @@
 use dioxus::prelude::*;
 
 #[derive(Props, Clone, PartialEq)]
-pub struct MaximizeIconProps {
+pub struct RestoreIconProps {
     #[props(default)]
     pub class: String,
 }
 
 #[component]
-pub fn MaximizeIcon(props: MaximizeIconProps) -> Element {
+pub fn RestoreIcon(props: RestoreIconProps) -> Element {
     rsx! {
         svg {
             class: props.class,
@@ -20,11 +20,15 @@ pub fn MaximizeIcon(props: MaximizeIconProps) -> Element {
             xmlns: "http://www.w3.org/2000/svg",
 
             rect {
-                x: "4",
-                y: "4",
-                width: "16",
-                height: "16",
-                rx: "1",
+                width: "14",
+                height: "14",
+                x: "8",
+                y: "8",
+                rx: "2",
+                ry: "2",
+            }
+            path {
+                d: "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2",
             }
         }
     }

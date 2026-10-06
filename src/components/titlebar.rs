@@ -7,7 +7,7 @@ use crate::components::ui::{
 };
 use crate::components::user::User;
 use crate::components::{SearchContext, TitleSearch};
-use crate::icons::{CloseIcon, MaximizeIcon, MinimizeIcon, MoonIcon, SunIcon};
+use crate::icons::{CloseIcon, MaximizeIcon, MinimizeIcon, MoonIcon, RestoreIcon, SunIcon};
 use crate::state::{get_real_current_date, use_app_state, AppState, TaskPriority, ThemeMode};
 
 /// Shared state for the New Task dialog (titlebar provides, command palette consumes).
@@ -79,6 +79,7 @@ pub fn TitleBar() -> Element {
 
     let mut show_shortcuts = use_signal(|| false);
     let mut show_about = use_signal(|| false);
+    let mut is_maximized = use_signal(|| false);
     let zoom = use_signal(|| 100u32);
 
     let router = router();
@@ -508,9 +509,8 @@ pub fn TitleBar() -> Element {
                             }
                         }
                     }
-                    // Minimize
                     button {
-                        class: "p-2 hover:bg-accent text-muted-foreground hover:text-foreground rounded-sm cursor-pointer transition-colors",
+                        class: "cursor-pointer p-2 hover:bg-accent",
 
                         onclick: move |_| {
                             dioxus::desktop::window().window.set_minimized(true);
@@ -521,18 +521,27 @@ pub fn TitleBar() -> Element {
                         }
                     }
 
-                    // Maximize
                     button {
-                        class: "p-2 hover:bg-accent text-muted-foreground hover:text-foreground rounded-sm cursor-pointer transition-colors",
-                        onclick: move |_| {
-                            dioxus::desktop::window().toggle_maximized();
-                        },
+                        class: "cursor-pointer p-2 hover:bg-accent",
 
-                        MaximizeIcon {
-                            class: "size-3".to_string(),
+                            onclick: move |_| {
+                                let window = dioxus::desktop::window();
+
+                                window.toggle_maximized();
+
+                                is_maximized.set(!is_maximized());
+                            },
+
+                            if is_maximized() {
+                                RestoreIcon {
+                                    class: "size-3".to_string(),
+                                }
+                            } else {
+                                MaximizeIcon {
+                                    class: "size-3".to_string(),
+                                }
+                            }
                         }
-                    }
-
                     // Close
                     button {
                         class: "p-2 hover:bg-destructive hover:text-white rounded-sm cursor-pointer transition-colors",

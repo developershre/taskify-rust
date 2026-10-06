@@ -51,6 +51,10 @@ pub use minimize::MinimizeIcon;
 mod minimize;
 
 #[allow(unused_imports)]
+pub use restore::RestoreIcon;
+mod restore;
+
+#[allow(unused_imports)]
 pub use moon::MoonIcon;
 mod moon;
 

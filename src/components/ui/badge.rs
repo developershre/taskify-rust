@@ -8,6 +8,9 @@ pub struct BadgeProps {
     #[props(default)]
     pub class: String,
 
+    #[props(default)]
+    pub size: String,
+
     pub children: Element,
 }
 
@@ -20,11 +23,19 @@ pub fn Badge(props: BadgeProps) -> Element {
         _ => "border-transparent bg-primary text-primary-foreground shadow-xs hover:bg-primary/80",
     };
 
+    let size_class = match props.size.as_str() {
+        "sm" => "text-xs",
+        "lg" => "text-lg",
+        "xl" => "text-xl",
+        "2xl" => "text-2xl",
+        _ => "text-sm",
+    };
+
     let class = format!(
-        "inline-flex items-center gap-1 rounded-md border px-2.5 py-0.5 text-xs font-semibold \
+        "inline-flex items-center gap-1 rounded-md border px-2.5 py-0.5 font-semibold \
          transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 \
-         select-none {} {}",
-        variant_class, props.class
+         select-none {variant_class} {size_class} {}",
+        props.class
     );
 
     rsx! {

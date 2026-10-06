@@ -1,15 +1,14 @@
 use dioxus::prelude::*;
 
 use crate::components::ui::{
-    Avatar, AvatarFallback, AvatarImage, Collapsible, CollapsibleContent, CollapsibleTrigger,
-    Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarMenu,
-    SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem,
-    SidebarRail,
+    Collapsible, CollapsibleContent, CollapsibleTrigger, Sidebar, SidebarContent, SidebarGroup,
+    SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub,
+    SidebarMenuSubButton, SidebarMenuSubItem, SidebarRail,
 };
 use crate::state::use_app_state;
 
 use crate::components::sidebar::SidebarHeaderComponent;
-use crate::icons::{CodeIcon, GamepadIcon, LayoutIcon};
+use crate::icons::{CodeIcon, GamepadIcon, HelpIcon, LayoutIcon};
 
 #[component]
 pub fn AppSidebar() -> Element {
@@ -353,41 +352,7 @@ pub fn AppSidebar() -> Element {
                                 }
                                 SidebarMenuItem {
                                     SidebarMenuButton { tooltip: "Help & Support".to_string(),
-                                        svg {
-                                            class: "size-4 text-muted-foreground",
-                                            view_box: "0 0 24 24",
-                                            fill: "none",
-                                            stroke: "currentColor",
-                                            stroke_width: "2",
-                                            rect {
-                                                width: "7",
-                                                height: "7",
-                                                x: "3",
-                                                y: "3",
-                                                rx: "1.5",
-                                            }
-                                            rect {
-                                                width: "7",
-                                                height: "7",
-                                                x: "14",
-                                                y: "3",
-                                                rx: "1.5",
-                                            }
-                                            rect {
-                                                width: "7",
-                                                height: "7",
-                                                x: "14",
-                                                y: "14",
-                                                rx: "1.5",
-                                            }
-                                            rect {
-                                                width: "7",
-                                                height: "7",
-                                                x: "3",
-                                                y: "14",
-                                                rx: "1.5",
-                                            }
-                                        }
+                                        HelpIcon{},
                                         span { "Help & Support" }
                                     }
                                 }
@@ -396,35 +361,6 @@ pub fn AppSidebar() -> Element {
                     }
                 }
             }
-
-            // 4. User Profile Footer: shadcn (Image 1 & 2)
-            SidebarFooter { class: "p-0 pt-2 border-0",
-                div { class: "flex items-center gap-3 p-1.5 rounded-lg hover:bg-sidebar-accent/50 cursor-pointer transition-colors group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0",
-                    Avatar { class: "size-8 border border-border/40 shrink-0 rounded-lg overflow-hidden",
-                        AvatarImage {
-                            src: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
-                                .to_string(),
-                            alt: "shadcn".to_string(),
-                        }
-                        AvatarFallback { "CN" }
-                    }
-                    div { class: "sidebar-text flex flex-col min-w-0 flex-1 text-left leading-tight",
-                        span { class: "font-semibold text-xs text-foreground truncate",
-                            "shadcn"
-                        }
-                        span { class: "text-[10px] text-muted-foreground truncate", "m@example.com" }
-                    }
-                    svg {
-                        class: "sidebar-text size-3.5 text-muted-foreground/60 shrink-0 ml-auto",
-                        view_box: "0 0 24 24",
-                        fill: "none",
-                        stroke: "currentColor",
-                        stroke_width: "2",
-                        path { d: "m7 15 5 5 5-5M7 9l5-5 5 5" }
-                    }
-                }
-            }
-
             SidebarRail {}
         }
     }

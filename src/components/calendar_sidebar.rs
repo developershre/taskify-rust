@@ -8,6 +8,8 @@ pub struct CalendarSidebarProps {
     pub class: String,
 }
 
+use crate::icons::EditIcon;
+
 #[component]
 pub fn CalendarSidebar(props: CalendarSidebarProps) -> Element {
     let mut app_state = use_app_state();
@@ -68,20 +70,11 @@ pub fn CalendarSidebar(props: CalendarSidebarProps) -> Element {
                 div { class: "flex items-center justify-between px-1",
                     div { class: "flex items-center gap-2",
                         // Notepad / Edit icon
-                        svg {
-                            class: "size-4 text-foreground",
-                            view_box: "0 0 24 24",
-                            fill: "none",
-                            stroke: "currentColor",
-                            stroke_width: "2",
-                            path { d: "M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" }
-                            path { d: "m15 5 4 4" }
-                        }
+                        EditIcon { class: "size-4" }
                         span { class: "text-sm font-semibold text-foreground tracking-tight",
                             "Notes"
                         }
                     }
-
                     // Add Note Button (+)
                     button {
                         class: "size-6 rounded flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-colors cursor-pointer",

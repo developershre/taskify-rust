@@ -95,13 +95,14 @@ pub fn Mcp() -> Element {
                                     ItemDescription { "{server.description}" }
                                 }
                                 ItemActions {
-                                    Badge { variant: "outline",
-                                        class: "text-[10px]",
+                                    Badge {
+                                        variant: "outline",
+                                        size: "sm",
                                         "{server.tools} tools"
                                     }
                                     Badge {
                                         variant: status_variant,
-                                        class: "text-[10px]",
+                                        size: "sm",
                                         "{server.status}"
                                     }
                                     Switch {

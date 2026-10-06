@@ -124,7 +124,7 @@ pub fn ChatIssues() -> Element {
                                     div { class: "flex items-center gap-2",
                                         Badge {
                                             variant: issue.variant,
-                                            class: "text-[10px]",
+                                            size: "sm",
                                             "{issue.label}"
                                         }
                                         span { class: "text-[10px] text-muted-foreground",
@@ -133,9 +133,9 @@ pub fn ChatIssues() -> Element {
                                     }
                                 }
                                 if issue.open {
-                                    Badge { variant: "outline", class: "text-[10px]", "Open" }
+                                    Badge { variant: "outline", size: "sm", "Open" }
                                 } else {
-                                    Badge { variant: "outline", class: "text-[10px]", "Closed" }
+                                    Badge { variant: "outline", size: "sm", "Closed" }
                                 }
                             }
                         }

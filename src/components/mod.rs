@@ -13,6 +13,6 @@ pub use app_sidebar::AppSidebar;
 pub use breadcrumb::BreadcrumbComponent;
 pub use calendar_sidebar::CalendarSidebar;
 pub use title_search::{SearchContext, TitleSearch};
-pub use titlebar::TitleBar;
+pub use titlebar::{NewTaskForm, TitleBar};
 #[allow(unused_imports)]
 pub use user::User;

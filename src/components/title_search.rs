@@ -1,14 +1,34 @@
 use dioxus::prelude::*;
 
+use crate::components::NewTaskForm;
 use crate::components::ui::{
     Command, CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList,
     CommandShortcut,
 };
 use crate::icons::SearchIcon;
+use crate::state::{use_app_state, AppState};
 
 #[derive(Clone, Copy, PartialEq)]
 pub struct SearchContext {
     pub open: Signal<bool>,
+}
+
+fn run_action(name: &str, mut app_state: AppState, mut new_task: NewTaskForm) {
+    match name {
+        "New Task" => new_task.open.set(true),
+        "New Note" => {
+            app_state.add_note(
+                "Untitled note".to_string(),
+                "Write something worth keeping.".to_string(),
+            );
+            let notes_open = *app_state.calendar_sidebar_open.read();
+            if !notes_open {
+                app_state.toggle_calendar_sidebar();
+            }
+        }
+        "Toggle Theme" => app_state.toggle_theme(),
+        _ => {}
+    }
 }
 
 #[component]
@@ -18,22 +38,24 @@ pub fn TitleSearch() -> Element {
         None => use_signal(|| false),
     };
     let mut search = use_signal(String::new);
+    let new_task = use_context::<NewTaskForm>();
+    let app_state = use_app_state();
+    let router = router();
 
     let query = search().to_lowercase();
     let q = query.trim();
 
     let nav_items = [
-        ("Dashboard", "G D"),
-        ("Tasks", "G T"),
-        ("Projects", "G P"),
-        ("Settings", "G S"),
+        ("Dashboard", "/"),
+        ("All Tasks", "/tasks/all"),
+        ("Urgent Tasks", "/tasks/urgent"),
+        ("Projects", "/projects"),
+        ("Calendar", "/calendar"),
+        ("Analytics", "/analytics"),
+        ("Settings", "/settings"),
     ];
 
-    let action_items = [
-        ("New Task", "Ctrl+N"),
-        ("Open File", "Ctrl+O"),
-        ("Save", "Ctrl+S"),
-    ];
+    let action_items = [("New Task", ""), ("New Note", ""), ("Toggle Theme", "")];
 
     let filtered_nav: Vec<_> = nav_items
         .into_iter()
@@ -49,8 +71,8 @@ pub fn TitleSearch() -> Element {
 
     let first_match = filtered_nav
         .first()
-        .map(|(n, _)| *n)
-        .or_else(|| filtered_actions.first().map(|(n, _)| *n));
+        .copied()
+        .or_else(|| filtered_actions.first().copied());
 
     rsx! {
         div {
@@ -100,8 +122,12 @@ pub fn TitleSearch() -> Element {
                         value: search,
                         onkeydown: move |e: KeyboardEvent| {
                             if e.key() == Key::Enter {
-                                if let Some(item) = first_match {
-                                    println!("Action executed: {item}");
+                                if let Some((name, path)) = first_match {
+                                    if !path.is_empty() {
+                                        let _ = router.push(path);
+                                    } else {
+                                        run_action(name, app_state, new_task);
+                                    }
                                     open.set(false);
                                     search.write().clear();
                                 }
@@ -121,16 +147,16 @@ pub fn TitleSearch() -> Element {
                         if !filtered_nav.is_empty() {
                             CommandGroup {
                                 heading: "Navigation".to_string(),
-                                for (name, shortcut) in filtered_nav {
+                                for (name, path) in filtered_nav {
                                     CommandItem {
                                         key: "{name}",
                                         onclick: move |_| {
-                                            println!("Action executed: {name}");
+                                            let _ = router.push(path);
                                             open.set(false);
                                             search.write().clear();
                                         },
                                         span { "{name}" }
-                                        CommandShortcut { "{shortcut}" }
+                                        CommandShortcut { "Enter" }
                                     }
                                 }
                             }
@@ -139,16 +165,16 @@ pub fn TitleSearch() -> Element {
                         if !filtered_actions.is_empty() {
                             CommandGroup {
                                 heading: "Actions".to_string(),
-                                for (name, shortcut) in filtered_actions {
+                                for (name, _) in filtered_actions {
                                     CommandItem {
                                         key: "{name}",
                                         onclick: move |_| {
-                                            println!("Action executed: {name}");
+                                            run_action(name, app_state, new_task);
                                             open.set(false);
                                             search.write().clear();
                                         },
                                         span { "{name}" }
-                                        CommandShortcut { "{shortcut}" }
+                                        CommandShortcut { "Enter" }
                                     }
                                 }
                             }

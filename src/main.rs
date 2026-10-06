@@ -17,7 +17,7 @@ fn load_window_icon() -> Option<Icon> {
 use components::{AppFrame, TitleBar};
 use views::{
     Analytics, Calendar, Chat, ChatIssues, ChatMail, ChatMessaging, Home, Mcp, Projects,
-    ProjectsGithub, ProjectsPersonal, Tasks, TasksAll, TasksArchived, TasksUrgent,
+    ProjectsGithub, ProjectsPersonal, Settings, Tasks, TasksAll, TasksArchived, TasksUrgent,
 };
 
 mod components;
@@ -66,6 +66,9 @@ pub enum Route {
 
     #[route("/mcp", Mcp)]
     Mcp {},
+
+    #[route("/settings", Settings)]
+    Settings {},
 }
 
 const FAVICON: Asset = asset!("/assets/favicon.ico");

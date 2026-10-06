@@ -27,6 +27,7 @@ pub fn AppFrame() -> Element {
             Route::ChatIssues {} => ("chat", "issues"),
             Route::Analytics {} => ("analytics", ""),
             Route::Mcp {} => ("mcp", ""),
+            Route::Settings {} => ("settings", ""),
         };
         app_state.active_nav.set(nav.to_string());
         app_state.selected_project.set(project.to_string());

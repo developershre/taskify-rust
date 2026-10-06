@@ -73,3 +73,7 @@ mod trash;
 #[allow(unused_imports)]
 pub use layer::LayersIcon;
 mod layer;
+
+#[allow(unused_imports)]
+pub use help::HelpIcon;
+mod help;

@@ -85,3 +85,7 @@ mod help;
 #[allow(unused_imports)]
 pub use plus::PlusIcon;
 mod plus;
+
+#[allow(unused_imports)]
+pub use zap::ZapIcon;
+mod zap;

@@ -84,7 +84,7 @@ pub fn TitleSearch() -> Element {
                 class: "flex items-center justify-between gap-3 px-3 py-1 text-xs \
                         text-muted-foreground bg-muted/40 hover:bg-muted/70 \
                         rounded-md border border-border/40 transition-colors \
-                        w-64 cursor-pointer select-none",
+                        w-40 sm:w-64 cursor-pointer select-none",
                 onclick: move |e| {
                     e.stop_propagation();
                     open.set(true);

@@ -118,11 +118,17 @@ pub fn Sidebar(props: SidebarProps) -> Element {
         SidebarCollapsible::None => "none",
     };
 
+    let mobile_class = if is_open {
+        "max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-40 max-md:bg-sidebar max-md:border-r max-md:border-sidebar-border max-md:shadow-2xl"
+    } else {
+        "max-md:hidden"
+    };
+
     let class = format!(
         "group group/sidebar peer relative flex h-full flex-col bg-sidebar \
          text-sidebar-foreground shrink-0 overflow-hidden \
-         {} {}",
-        width_class, props.class
+         {} {} {}",
+        width_class, mobile_class, props.class
     );
 
     rsx! {

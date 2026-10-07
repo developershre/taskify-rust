@@ -1,5 +1,5 @@
-use crate::components::ui::Calendar;
-use crate::state::use_app_state;
+use crate::components::ui::{Calendar, Item, ItemActions, ItemContent, ItemDescription, ItemTitle};
+use crate::state::{use_app_state, OverlayState};
 use dioxus::prelude::*;
 
 #[derive(Props, Clone, PartialEq)]
@@ -14,14 +14,27 @@ use crate::icons::EditIcon;
 pub fn CalendarSidebar(props: CalendarSidebarProps) -> Element {
     let mut app_state = use_app_state();
     let is_open = *app_state.calendar_sidebar_open.read();
+    let overlay = use_context::<OverlayState>();
 
-    // New note inline modal/form state
-    let mut show_new_note = use_signal(|| false);
-    let mut new_note_title = use_signal(String::new);
-    let mut new_note_desc = use_signal(String::new);
+    // Self-dim while any dialog is open: the sidebar subscribes to the shared
+    // OverlayState and recedes (opacity + inertness) instead of relying on
+    // z-ordering against the dialog scrim/content.
+    let dialog_class = if overlay.is_dialog_open() {
+        " opacity-50 pointer-events-none"
+    } else {
+        ""
+    };
 
     // Active action menu id
     let mut active_action_id = use_signal(|| Option::<String>::None);
+
+    // The sidebar itself stays visible while a dialog is open; only close a
+    // dangling note popup so it never floats next to the dialog.
+    use_effect(move || {
+        if overlay.is_dialog_open() {
+            active_action_id.set(None);
+        }
+    });
 
     let action_menu_anchor = active_action_id;
     use_effect(move || {
@@ -47,8 +60,9 @@ pub fn CalendarSidebar(props: CalendarSidebarProps) -> Element {
     rsx! {
         aside {
             class: format!(
-                "w-60 sm:w-72 shrink-0 rounded-2xl border border-border/40 bg-card p-4 flex flex-col h-full overflow-y-auto select-none shadow-xs gap-5 transition-all duration-300 {}",
+                "w-60 sm:w-72 shrink-0 rounded-2xl border border-border/40 bg-card p-4 flex flex-col h-full overflow-y-auto select-none shadow-xs gap-5 transition-all duration-300 isolate max-xl:fixed max-xl:inset-y-0 max-xl:right-0 max-xl:z-40 max-xl:rounded-none max-xl:w-72 max-xl:shadow-2xl {}{}",
                 props.class,
+                dialog_class,
             ),
 
             // ============================================================
@@ -59,6 +73,7 @@ pub fn CalendarSidebar(props: CalendarSidebarProps) -> Element {
                 onselect: move |date: (u32, u32, u32)| {
                     app_state.selected_date.set(Some(date));
                 },
+                events: app_state.calendar_events.read().clone(),
             }
 
             // ============================================================
@@ -80,8 +95,7 @@ pub fn CalendarSidebar(props: CalendarSidebarProps) -> Element {
                         class: "size-6 rounded flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-sidebar-accent transition-colors cursor-pointer",
                         title: "Add Note",
                         onclick: move |_| {
-                            let cur = *show_new_note.read();
-                            show_new_note.set(!cur);
+                            app_state.new_note_open.set(true);
                         },
                         svg {
                             class: "size-4",
@@ -90,53 +104,6 @@ pub fn CalendarSidebar(props: CalendarSidebarProps) -> Element {
                             stroke: "currentColor",
                             stroke_width: "2",
                             path { d: "M12 5v14M5 12h14" }
-                        }
-                    }
-                }
-
-                // Inline New Note Creator Form
-                if *show_new_note.read() {
-                    div { class: "p-3 rounded-xl border border-border bg-card shadow-sm flex flex-col gap-2.5",
-                        input {
-                            class: "w-full text-xs font-semibold bg-transparent border-b border-border/60 pb-1 outline-none text-foreground placeholder:text-muted-foreground/50",
-                            placeholder: "Note title...",
-                            value: "{new_note_title}",
-                            oninput: move |e| new_note_title.set(e.value()),
-                        }
-                        textarea {
-                            class: "w-full text-[11px] bg-transparent resize-none h-14 outline-none text-foreground placeholder:text-muted-foreground/50",
-                            placeholder: "A simple item with title and description...",
-                            value: "{new_note_desc}",
-                            oninput: move |e| new_note_desc.set(e.value()),
-                        }
-                        div { class: "flex items-center justify-end gap-2 pt-1 border-t border-border/40",
-                            button {
-                                class: "px-2 py-1 text-[11px] rounded text-muted-foreground hover:text-foreground cursor-pointer",
-                                onclick: move |_| show_new_note.set(false),
-                                "Cancel"
-                            }
-                            button {
-                                class: "px-2.5 py-1 text-[11px] rounded bg-primary text-primary-foreground font-medium hover:opacity-90 transition-opacity cursor-pointer",
-                                onclick: move |_| {
-                                    let t = new_note_title.read().clone();
-                                    let d = new_note_desc.read().clone();
-                                    if !t.trim().is_empty() {
-                                        app_state
-                                            .add_note(
-                                                t,
-                                                if d.trim().is_empty() {
-                                                    "A simple item with title and description.".to_string()
-                                                } else {
-                                                    d
-                                                },
-                                            );
-                                        new_note_title.set(String::new());
-                                        new_note_desc.set(String::new());
-                                        show_new_note.set(false);
-                                    }
-                                },
-                                "Add Note"
-                            }
                         }
                     }
                 }
@@ -158,37 +125,36 @@ pub fn CalendarSidebar(props: CalendarSidebarProps) -> Element {
                                 div {
                                     key: "{note.id}",
                                     "data-popup-anchor": "true",
-                                    class: "relative rounded-xl p-3.5 bg-card/60 hover:bg-card border border-border/50 hover:border-border transition-colors flex items-center justify-between gap-3 shadow-2xs group",
 
-                                    // Action Dropdown Menu
-                                    div { class: "flex flex-col min-w-0 flex-1",
-                                        span { class: "font-semibold text-xs text-foreground truncate", "{note.title}" }
-                                        p { class: "text-[11px] text-muted-foreground mt-0.5 leading-relaxed truncate",
-                                            "{note.description}"
+                                    Item {
+                                        ItemContent {
+                                            ItemTitle { "{note.title}" }
+                                            ItemDescription { "{note.description}" }
                                         }
-                                    }
-
-                                    button {
-                                        r#type: "button",
-                                        "data-popup-trigger": "true",
-                                        class: "px-2.5 py-1 text-xs rounded-md bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium shrink-0 cursor-pointer border border-border/30 transition-colors shadow-2xs",
-                                        onclick: {
-                                            let nid = note.id.clone();
-                                            move |_| {
-                                                if active_action_id.read().as_deref() == Some(nid.as_str()) {
-                                                    active_action_id.set(None);
-                                                } else {
-                                                    active_action_id.set(Some(nid.clone()));
-                                                }
+                                        ItemActions {
+                                            button {
+                                                r#type: "button",
+                                                "data-popup-trigger": "true",
+                                                class: "px-2.5 py-1 text-xs rounded-md bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium shrink-0 cursor-pointer border border-border/30 transition-colors shadow-2xs",
+                                                onclick: {
+                                                    let nid = note.id.clone();
+                                                    move |_| {
+                                                        if active_action_id.read().as_deref() == Some(nid.as_str()) {
+                                                            active_action_id.set(None);
+                                                        } else {
+                                                            active_action_id.set(Some(nid.clone()));
+                                                        }
+                                                    }
+                                                },
+                                                "Actions"
                                             }
-                                        },
-                                        "Actions"
+                                        }
                                     }
 
                                     if is_menu_open {
                                         div { "data-popup": format!("note-{}", note.id),
                                             class: "fixed left-0 top-0 z-50 invisible",
-                                            div { class: "w-28 rounded-lg border border-border bg-popover text-popover-foreground shadow-md p-1 flex flex-col gap-0.5 animate-in fade-in-50 zoom-in-95",
+                                            div { class: "w-28 rounded-lg border border-border bg-popover text-popover-foreground p-1 flex flex-col gap-0.5 animate-in fade-in-50 zoom-in-95",
                                                 button {
                                                     class: "w-full text-left px-2 py-1 text-xs rounded hover:bg-muted text-foreground transition-colors cursor-pointer",
                                                     onclick: move |_| {

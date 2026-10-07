@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use crate::components::ui::{SidebarProvider, TooltipProvider};
-use crate::components::{AppSidebar, BreadcrumbComponent, CalendarSidebar};
+use crate::components::{AppSidebar, BreadcrumbComponent, CalendarSidebar, NewNoteDialog};
 use crate::state::use_app_state;
 use crate::Route;
 
@@ -28,6 +28,7 @@ pub fn AppFrame() -> Element {
             Route::Analytics {} => ("analytics", ""),
             Route::Mcp {} => ("mcp", ""),
             Route::Settings {} => ("settings", ""),
+            Route::ComponentsCalendar {} => ("components", "Calendar"),
         };
         app_state.active_nav.set(nav.to_string());
         app_state.selected_project.set(project.to_string());
@@ -45,7 +46,7 @@ pub fn AppFrame() -> Element {
                 // ============================================================
                 // Column 2: Middle Area - Card Panel (shared across pages)
                 // ============================================================
-                main { class: "flex-1 rounded-2xl border border-border/40 bg-card p-6 flex flex-col h-full overflow-y-auto shadow-xs transition-colors duration-200",
+                main { class: "flex-1 min-w-0 rounded-2xl border border-border/40 bg-card p-3 sm:p-6 flex flex-col h-full overflow-y-auto shadow-xs transition-colors duration-200",
 
                     // Top Bar: Panel toggle icon + Breadcrumb
                     div { class: "flex items-center justify-between pb-2",
@@ -114,9 +115,28 @@ pub fn AppFrame() -> Element {
                 }
 
                 // ============================================================
+                // Mobile drawer backdrops
+                // ============================================================
+                if *app_state.sidebar_open.read() {
+                    div {
+                        class: "fixed inset-0 z-30 bg-black/50 md:hidden",
+                        onclick: move |_| app_state.sidebar_open.set(false),
+                    }
+                }
+
+                if *app_state.calendar_sidebar_open.read() {
+                    div {
+                        class: "fixed inset-0 z-30 bg-black/50 xl:hidden",
+                        onclick: move |_| app_state.calendar_sidebar_open.set(false),
+                    }
+                }
+
+                // ============================================================
                 // Column 3: Right Area - Custom Calendar & Notes Card Panel
                 // ============================================================
                 CalendarSidebar {}
+
+                NewNoteDialog {}
             }
         }
     }

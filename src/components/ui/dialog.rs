@@ -106,8 +106,8 @@ pub fn DialogContent(props: DialogContentProps) -> Element {
     }
 
     let class = format!(
-        "fixed left-1/2 top-1/2 z-[100] grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 \
-         gap-4 border bg-background p-6 shadow-lg rounded-xl duration-200 \
+        "fixed left-1/2 top-1/2 z-[110] grid w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 \
+         gap-4 border bg-background p-4 sm:p-6 shadow-lg rounded-xl duration-200 \
          animate-in fade-in-0 zoom-in-95 outline-none {}",
         props.class
     );
@@ -115,7 +115,7 @@ pub fn DialogContent(props: DialogContentProps) -> Element {
     rsx! {
         // Backdrop overlay
         div {
-            class: "fixed inset-0 z-[100] bg-black/60 backdrop-blur-xs animate-in fade-in-0",
+            class: "fixed inset-0 z-[110] bg-black/60 backdrop-blur-xs animate-in fade-in-0",
             onmousedown: move |e| {
                 e.stop_propagation();
                 ctx.open.set(false);

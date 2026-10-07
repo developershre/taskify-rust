@@ -25,7 +25,7 @@ pub fn Settings() -> Element {
                         "Your public profile information across Taskify."
                     }
                 }
-                div { class: "flex items-center gap-4",
+                div { class: "flex flex-wrap items-center gap-4",
                     Avatar { class: "size-14 rounded-xl overflow-hidden border border-border/40 shrink-0",
                         AvatarImage {
                             src: "https://ui.shadcn.com/avatars/shadcn.jpg".to_string(),

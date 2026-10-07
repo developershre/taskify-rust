@@ -8,7 +8,7 @@ use crate::components::ui::{
 use crate::components::user::User;
 use crate::components::{SearchContext, TitleSearch};
 use crate::icons::{CloseIcon, MaximizeIcon, MinimizeIcon, MoonIcon, RestoreIcon, SunIcon};
-use crate::state::{get_real_current_date, use_app_state, AppState, TaskPriority, ThemeMode};
+use crate::state::{get_real_current_date, use_app_state, AppState, OverlayState, TaskPriority, ThemeMode};
 
 /// Shared state for the New Task dialog (titlebar provides, command palette consumes).
 #[derive(Clone, Copy, PartialEq)]
@@ -81,6 +81,12 @@ pub fn TitleBar() -> Element {
     let mut show_about = use_signal(|| false);
     let mut is_maximized = use_signal(|| false);
     let zoom = use_signal(|| 100u32);
+
+    let overlay = use_context::<OverlayState>();
+    use_effect(move || {
+        let open = *new_task.open.read() || *show_shortcuts.read() || *show_about.read();
+        overlay.set_dialog_open(open);
+    });
 
     let router = router();
 
@@ -230,7 +236,7 @@ pub fn TitleBar() -> Element {
                 // Titlebar Menus (File, Task, View, Go, Help)
                 // ============================================================
                 div {
-                    class: "flex items-center gap-0.5 shrink-0",
+                    class: "hidden items-center gap-0.5 shrink-0 lg:flex",
 
                     // File
                     DropdownMenu {
@@ -493,7 +499,7 @@ pub fn TitleBar() -> Element {
 
                     div{
                         class: "flex items-center justify-center gap-1.5",
-                        User{},
+                        div { class: "hidden md:block", User{} },
 
                         // Theme Quick Toggle
                         button {

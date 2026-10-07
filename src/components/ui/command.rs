@@ -66,7 +66,7 @@ pub fn CommandDialog(mut props: CommandDialogProps) -> Element {
     };
 
     let class = format!(
-        "fixed left-1/2 {top_class}z-[100] w-full max-w-xl \
+        "fixed left-1/2 {top_class}z-[100] w-[calc(100%-2rem)] max-w-xl \
          -translate-x-1/2 overflow-hidden rounded-xl \
          border bg-popover p-0 shadow-2xl {}",
         props.class

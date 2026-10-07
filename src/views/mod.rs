@@ -1,6 +1,7 @@
 mod analytics;
-mod calendar;
+pub mod calendar;
 mod chat;
+mod components;
 mod empty_state;
 mod home;
 mod mcp;
@@ -13,6 +14,7 @@ mod tasks;
 pub use analytics::Analytics;
 pub use calendar::Calendar;
 pub use chat::{Chat, ChatIssues, ChatMail, ChatMessaging};
+pub use components::ComponentsCalendar;
 pub use empty_state::EmptyState;
 pub use home::Home;
 pub use mcp::Mcp;

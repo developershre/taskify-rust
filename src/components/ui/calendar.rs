@@ -1,5 +1,8 @@
 use dioxus::prelude::*;
 
+use super::{Tooltip, TooltipContent, TooltipTrigger};
+use crate::components::month_calendar::{is_event_on, CalEvent};
+
 #[derive(Props, Clone, PartialEq)]
 pub struct CalendarProps {
     #[props(default)]
@@ -13,6 +16,9 @@ pub struct CalendarProps {
 
     #[props(default)]
     pub onselect: Option<EventHandler<(u32, u32, u32)>>,
+
+    #[props(default)]
+    pub events: Vec<CalEvent>,
 
     #[props(default)]
     pub class: String,
@@ -202,26 +208,82 @@ pub fn Calendar(props: CalendarProps) -> Element {
 
                         let is_today = real_now.0 == year && real_now.1 == month && real_now.2 == day;
 
+                        let day_date = (year, month, day);
+                        let day_events: Vec<CalEvent> = props
+                            .events
+                            .iter()
+                            .filter(|e| is_event_on(e, day_date))
+                            .cloned()
+                            .collect();
+
                         let day_class = if is_selected {
-                            "size-8 mx-auto flex items-center justify-center rounded-lg bg-zinc-700 text-white dark:bg-zinc-700 dark:text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer"
+                            "size-8 mx-auto flex flex-col items-center justify-center gap-1 rounded-lg bg-zinc-700 text-white dark:bg-zinc-700 dark:text-white font-semibold text-xs shadow-xs transition-colors cursor-pointer"
                         } else if is_today {
-                            "size-8 mx-auto flex items-center justify-center rounded-lg border border-primary/50 text-foreground font-semibold text-xs hover:bg-muted transition-colors cursor-pointer"
+                            "size-8 mx-auto flex flex-col items-center justify-center gap-1 rounded-lg border border-primary/50 text-foreground font-semibold text-xs hover:bg-muted transition-colors cursor-pointer"
                         } else {
-                            "size-8 mx-auto flex items-center justify-center rounded-lg text-foreground hover:bg-muted text-xs font-normal transition-colors cursor-pointer"
+                            "size-8 mx-auto flex flex-col items-center justify-center gap-1 rounded-lg text-foreground hover:bg-muted text-xs font-normal transition-colors cursor-pointer"
+                        };
+
+                        let on_day_click = {
+                            let mut sel = selected;
+                            let handler = props.onselect;
+                            move |_| {
+                                sel.set(Some(day_date));
+                                if let Some(h) = handler {
+                                    h.call(day_date);
+                                }
+                            }
                         };
 
                         rsx! {
-                            button {
-                                key: "current-{day}",
-                                r#type: "button",
-                                class: day_class,
-                                onclick: move |_| {
-                                    selected.set(Some((year, month, day)));
-                                    if let Some(handler) = &props.onselect {
-                                        handler.call((year, month, day));
+                            if day_events.is_empty() {
+                                button {
+                                    key: "current-{day}",
+                                    r#type: "button",
+                                    class: day_class,
+                                    onclick: on_day_click,
+                                    "{day}"
+                                }
+                            } else {
+                                Tooltip {
+                                    key: "current-{day}",
+                                    TooltipTrigger { class: "w-full justify-center",
+                                        button {
+                                            r#type: "button",
+                                            class: day_class,
+                                            onclick: on_day_click,
+                                            span { class: "leading-none", "{day}" }
+                                            span { class: "flex gap-0.5",
+                                                for ev in day_events.iter().take(3) {
+                                                    span {
+                                                        key: "{ev.id}",
+                                                        class: "size-1 rounded-full {ev.color.dot_class()}",
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
-                                },
-                                "{day}"
+                                    TooltipContent { side: "top",
+                                        div { class: "flex flex-col gap-1",
+                                            for ev in day_events.iter() {
+                                                {
+                                                    let label_time = ev.time.as_deref().unwrap_or("All day");
+                                                    rsx! {
+                                                        div {
+                                                            key: "{ev.id}",
+                                                            class: "flex items-center gap-1.5",
+                                                            span {
+                                                                class: "size-1.5 shrink-0 rounded-full {ev.color.dot_class()}",
+                                                            }
+                                                            span { class: "font-medium", "{label_time}" }
+                                                            span { class: "opacity-80", "{ev.title}" }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

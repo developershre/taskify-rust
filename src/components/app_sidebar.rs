@@ -1,19 +1,21 @@
 use dioxus::prelude::*;
 
 use crate::components::ui::{
-    Collapsible, CollapsibleContent, CollapsibleTrigger, Sidebar, SidebarContent, SidebarGroup,
-    SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub,
-    SidebarMenuSubButton, SidebarMenuSubItem, SidebarRail,
+    Collapsible, CollapsibleContent, CollapsibleTrigger, Dialog, DialogContent, DialogDescription,
+    DialogFooter, DialogHeader, DialogTitle, DialogTrigger, Sidebar, SidebarContent, SidebarFooter,
+    SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
+    SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, SidebarRail,
 };
 use crate::state::use_app_state;
 
 use crate::components::sidebar::SidebarHeaderComponent;
-use crate::icons::{CodeIcon, GamepadIcon, HelpIcon, LayoutIcon};
+use crate::icons::{CodeIcon, GamepadIcon, HelpIcon, LayoutIcon, ZapIcon};
 
 #[component]
 pub fn AppSidebar() -> Element {
     let mut app_state = use_app_state();
     let router = router();
+    let mut upgrade_open = use_signal(|| false);
 
     rsx! {
         Sidebar { class: "border-0 shrink-0 bg-transparent",
@@ -193,9 +195,6 @@ pub fn AppSidebar() -> Element {
                                     active: *app_state.active_nav.read() == "calendar",
                                     onclick: move |_| {
                                         app_state.active_nav.set("calendar".to_string());
-                                        if !*app_state.calendar_sidebar_open.read() {
-                                            app_state.calendar_sidebar_open.set(true);
-                                        }
                                         let _ = router.push("/calendar");
                                     },
                                     svg {
@@ -362,6 +361,89 @@ pub fn AppSidebar() -> Element {
                 }
             }
             SidebarRail {}
+            SidebarFooter{
+                SidebarContent {
+                    Dialog {
+                        open: upgrade_open,
+                        DialogTrigger {
+                            class: "w-full group-data-[collapsible=icon]:hidden",
+                            div {
+                                class: "w-full grid grid-cols-1 gap-2.5 rounded-xl border border-primary/25 \
+                                        bg-linear-to-br from-primary/15 via-primary/5 to-transparent \
+                                        p-2.5 text-left shadow-xs",
+                                div {
+                                    class: "flex items-center gap-2.5",
+                                    span {
+                                        class: "size-8 shrink-0 grid place-items-center rounded-lg bg-primary/15 text-primary",
+                                        ZapIcon { class: "size-4" }
+                                    }
+                                    span { class: "flex min-w-0 flex-1 flex-col",
+                                        span { class: "text-xs font-semibold text-foreground leading-tight",
+                                            "Upgrade to Pro"
+                                        }
+                                        span { class: "text-[10px] text-muted-foreground truncate",
+                                            "Unlimited projects & reports"
+                                        }
+                                    }
+                                }
+                                span {
+                                    class: "shrink-0 rounded-md bg-primary px-2 py-1 text-[10px] font-semibold text-primary-foreground",
+                                    "Upgrade"
+                                }
+                            }
+                        }
+                        DialogContent {
+                            DialogHeader {
+                                DialogTitle { "Upgrade to Pro" }
+                                DialogDescription { "Unlock the full potential of Taskify." }
+                            }
+
+                            div { class: "flex flex-col gap-2.5",
+                                for benefit in [
+                                    "Unlimited projects and tasks",
+                                    "Advanced analytics and reports",
+                                    "Priority support",
+                                ] {
+                                    div { key: "{benefit}", class: "flex items-start gap-2.5 text-sm text-foreground",
+                                        span {
+                                            class: "mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary",
+                                            svg {
+                                                class: "size-2.5",
+                                                view_box: "0 0 24 24",
+                                                fill: "none",
+                                                stroke: "currentColor",
+                                                stroke_width: "3",
+                                                stroke_linecap: "round",
+                                                stroke_linejoin: "round",
+                                                path { d: "M20 6 9 17l-5-5" }
+                                            }
+                                        }
+                                        span { "{benefit}" }
+                                    }
+                                }
+                                p { class: "pt-1 text-xs text-muted-foreground",
+                                    "Starting at $9/month \u{b7} Cancel anytime"
+                                }
+                            }
+
+                            DialogFooter {
+                                button {
+                                    r#type: "button",
+                                    class: "h-8 rounded-md border border-border/40 px-3 text-xs font-medium text-foreground hover:bg-muted transition-colors cursor-pointer",
+                                    onclick: move |_| upgrade_open.set(false),
+                                    "Maybe later"
+                                }
+                                button {
+                                    r#type: "button",
+                                    class: "h-8 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground hover:opacity-90 transition-opacity cursor-pointer",
+                                    onclick: move |_| upgrade_open.set(false),
+                                    "Upgrade Now"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

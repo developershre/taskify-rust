@@ -1,9 +1,13 @@
 use dioxus::prelude::*;
 
+pub mod overlay_state;
 pub mod tasks_state;
 
+pub use overlay_state::{use_overlay_state, OverlayState};
 pub use tasks_state::{TaskItem, TaskPriority, TaskStatus};
 use tasks_state::initial_tasks;
+
+use crate::components::month_calendar::CalEvent;
 
 // ============================================================
 // Theme Mode
@@ -70,9 +74,11 @@ pub struct AppState {
     pub show_completed: Signal<bool>,
     pub auto_sync: Signal<bool>,
     pub selected_date: Signal<Option<(u32, u32, u32)>>,
+    pub calendar_events: Signal<Vec<CalEvent>>,
     pub real_today: Signal<(u32, u32, u32)>,
     pub sidebar_open: Signal<bool>,
     pub calendar_sidebar_open: Signal<bool>,
+    pub new_note_open: Signal<bool>,
 }
 
 impl AppState {
@@ -218,9 +224,11 @@ pub fn use_init_app_state() -> AppState {
     let show_completed = use_signal(|| false);
     let auto_sync = use_signal(|| true);
     let mut selected_date = use_signal(move || Some(real_now));
+    let calendar_events = use_signal(crate::views::calendar::sample_events);
     let mut real_today = use_signal(move || real_now);
     let sidebar_open = use_signal(|| true);
     let calendar_sidebar_open = use_signal(|| true);
+    let new_note_open = use_signal(|| false);
 
     let state = AppState {
         theme,
@@ -233,9 +241,11 @@ pub fn use_init_app_state() -> AppState {
         show_completed,
         auto_sync,
         selected_date,
+        calendar_events,
         real_today,
         sidebar_open,
         calendar_sidebar_open,
+        new_note_open,
     };
 
     use_context_provider(|| state);
@@ -314,6 +324,43 @@ pub fn use_init_app_state() -> AppState {
                         selected_date.set(Some((y, m, d)));
                     }
                 }
+            }
+        });
+
+        // Responsive drawer state: force-close sidebars when the window is
+        // too narrow for the in-flow layout, restore defaults on first sizing report.
+        let mut side = state.sidebar_open;
+        let mut right = state.calendar_sidebar_open;
+        let mut size_eval = document::eval(
+            r#"
+            try {
+                var last = null;
+                function send(force) {
+                    var w = window.innerWidth;
+                    var cur = { narrow: w < 768, right_hidden: w < 1280 };
+                    if (force || !last || last.narrow !== cur.narrow || last.right_hidden !== cur.right_hidden) {
+                        last = cur;
+                        dioxus.send(JSON.stringify(cur));
+                    }
+                }
+                window.addEventListener('resize', function () { send(false); });
+                send(true);
+            } catch (e) {}
+            "#,
+        );
+
+        spawn(async move {
+            let mut first = true;
+            while let Ok(msg) = size_eval.recv::<String>().await {
+                let narrow = msg.contains("\"narrow\":true");
+                let right_hidden = msg.contains("\"right_hidden\":true");
+                if first || narrow {
+                    side.set(!narrow);
+                }
+                if first || right_hidden {
+                    right.set(!right_hidden);
+                }
+                first = false;
             }
         });
     });

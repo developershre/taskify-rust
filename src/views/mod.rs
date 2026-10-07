@@ -7,9 +7,7 @@ mod mcp;
 mod page_header;
 mod projects;
 mod settings;
-mod stat_card;
-mod task_card;
-mod task_row;
+
 mod tasks;
 
 pub use analytics::Analytics;
@@ -21,7 +19,4 @@ pub use mcp::Mcp;
 pub use page_header::PageHeader;
 pub use projects::{Projects, ProjectsGithub, ProjectsPersonal};
 pub use settings::Settings;
-pub use stat_card::StatCard;
-pub use task_card::{TaskCard, TaskDnd};
-pub use task_row::TaskRow;
 pub use tasks::{Tasks, TasksAll, TasksArchived, TasksUrgent};

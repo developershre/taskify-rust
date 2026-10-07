@@ -16,15 +16,6 @@ pub fn CalendarSidebar(props: CalendarSidebarProps) -> Element {
     let is_open = *app_state.calendar_sidebar_open.read();
     let overlay = use_context::<OverlayState>();
 
-    // Self-dim while any dialog is open: the sidebar subscribes to the shared
-    // OverlayState and recedes (opacity + inertness) instead of relying on
-    // z-ordering against the dialog scrim/content.
-    let dialog_class = if overlay.is_dialog_open() {
-        " opacity-50 pointer-events-none"
-    } else {
-        ""
-    };
-
     // Active action menu id
     let mut active_action_id = use_signal(|| Option::<String>::None);
 
@@ -60,9 +51,8 @@ pub fn CalendarSidebar(props: CalendarSidebarProps) -> Element {
     rsx! {
         aside {
             class: format!(
-                "w-60 sm:w-72 shrink-0 rounded-2xl border border-border/40 bg-card p-4 flex flex-col h-full overflow-y-auto select-none shadow-xs gap-5 transition-all duration-300 isolate max-xl:fixed max-xl:inset-y-0 max-xl:right-0 max-xl:z-40 max-xl:rounded-none max-xl:w-72 max-xl:shadow-2xl {}{}",
+                "w-60 sm:w-72 shrink-0 rounded-2xl border border-border/40 bg-card p-4 flex flex-col h-full overflow-y-auto select-none shadow-xs gap-5 transition-all duration-300 isolate max-xl:fixed max-xl:inset-y-0 max-xl:right-0 max-xl:z-20 max-xl:rounded-none max-xl:w-72 max-xl:shadow-2xl {}",
                 props.class,
-                dialog_class,
             ),
 
             // ============================================================
@@ -122,10 +112,9 @@ pub fn CalendarSidebar(props: CalendarSidebarProps) -> Element {
                             let is_menu_open = active_action_id.read().as_deref() == Some(note.id.as_str());
 
                             rsx! {
-                                div {
-                                    key: "{note.id}",
-                                    "data-popup-anchor": "true",
 
+                                div { key: "{note.id}", "data-popup-anchor": "true",
+        
                                     Item {
                                         ItemContent {
                                             ItemTitle { "{note.title}" }
@@ -150,9 +139,10 @@ pub fn CalendarSidebar(props: CalendarSidebarProps) -> Element {
                                             }
                                         }
                                     }
-
+        
                                     if is_menu_open {
-                                        div { "data-popup": format!("note-{}", note.id),
+                                        div {
+                                            "data-popup": format!("note-{}", note.id),
                                             class: "fixed left-0 top-0 z-50 invisible",
                                             div { class: "w-28 rounded-lg border border-border bg-popover text-popover-foreground p-1 flex flex-col gap-0.5 animate-in fade-in-50 zoom-in-95",
                                                 button {

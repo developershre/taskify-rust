@@ -1,7 +1,7 @@
 use dioxus::prelude::*;
 
 use crate::components::ui::{Badge, Item, ItemActions, ItemContent, ItemDescription, ItemMedia, ItemTitle, Switch};
-use crate::views::PageHeader;
+use crate::components::PageHeader;
 
 struct McpServer {
     name: &'static str,

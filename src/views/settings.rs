@@ -3,7 +3,7 @@ use dioxus::prelude::*;
 use crate::components::ui::{Avatar, AvatarFallback, AvatarImage, Badge, Switch};
 use crate::state::use_app_state;
 use crate::state::ThemeMode;
-use crate::views::PageHeader;
+use crate::components::PageHeader;
 
 #[component]
 pub fn Settings() -> Element {

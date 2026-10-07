@@ -144,7 +144,7 @@ pub fn Calendar() -> Element {
     let month_label = format!("{} {}", MONTH_NAMES[(month() - 1) as usize], year());
 
     rsx! {
-        div { class: "flex h-full flex-col",
+        div { class: "flex h-full min-h-0 flex-col",
             div { class: "flex-1 min-h-0 flex flex-col overflow-hidden rounded-2xl border border-border/40 bg-card shadow-xs",
 
             CalendarToolbar {
@@ -175,11 +175,15 @@ pub fn Calendar() -> Element {
                     month.set(today.1);
                 },
                 on_view_change: move |new_view| view.set(new_view),
+                on_new_event: move |_| {
+                    clicked_date.set(Some(today));
+                    add_dialog_open.set(true);
+                },
             }
 
             WeekdayHeader {}
 
-            div { class: "flex-1 min-h-0 overflow-y-auto",
+            div { class: "flex-1 min-h-0 flex flex-col overflow-hidden",
             MonthGrid {
                 year: year(),
                 month: month(),

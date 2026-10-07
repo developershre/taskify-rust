@@ -2,8 +2,8 @@ use dioxus::prelude::*;
 
 use crate::components::{AppFrame, TitleBar};
 use crate::views::{
-    Analytics, Calendar, Chat, ChatIssues, ChatMail, ChatMessaging, ComponentsCalendar, Home, Mcp,
-    Projects, ProjectsGithub, ProjectsPersonal, Settings, Tasks, TasksAll, TasksArchived,
+    Analytics, Calendar, Chat, ChatIssues, ChatMail, ChatMessaging, Components, ComponentsCalendar,
+    Home, Mcp, Projects, ProjectsGithub, ProjectsPersonal, Settings, Tasks, TasksAll, TasksArchived,
     TasksUrgent,
 };
 
@@ -64,6 +64,11 @@ pub enum Route {
 
     #[route("/settings", Settings)]
     Settings {},
+
+    #[layout(TitleBar)]
+    #[layout(AppFrame)]
+    #[route("/components", Components)]
+    Components {},
 
     #[layout(TitleBar)]
     #[layout(AppFrame)]

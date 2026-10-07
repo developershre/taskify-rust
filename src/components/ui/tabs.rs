@@ -5,6 +5,7 @@ use dioxus::prelude::*;
 // ============================================================
 
 #[derive(Clone, Copy, PartialEq)]
+#[allow(dead_code)]
 pub struct TabsContext {
     pub value: Signal<String>,
     pub orientation: Signal<String>,
@@ -57,6 +58,7 @@ pub fn Tabs(props: TabsProps) -> Element {
 // ============================================================
 
 #[derive(Clone, PartialEq, Default)]
+#[allow(dead_code)]
 pub enum TabsListVariant {
     #[default]
     Default,
@@ -64,6 +66,7 @@ pub enum TabsListVariant {
 }
 
 impl TabsListVariant {
+    #[allow(dead_code)]
     fn as_str(&self) -> &'static str {
         match self {
             Self::Default => "default",

@@ -1,6 +1,7 @@
 use dioxus::prelude::*;
 
 #[derive(Clone, Copy, PartialEq)]
+#[allow(dead_code)]
 enum TaskView {
     Board,
     List,

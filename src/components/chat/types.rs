@@ -1,0 +1,356 @@
+#[derive(Clone, Copy, PartialEq, Debug)]
+#[allow(dead_code)]
+pub enum MessageStatus {
+    Sent,
+    Delivered,
+    Read,
+}
+
+#[derive(Clone, PartialEq, Debug)]
+pub struct MediaItem {
+    pub url: String,
+    pub title: String,
+}
+
+#[derive(Clone, PartialEq, Debug)]
+pub enum MessageContent {
+    Text(String),
+    Document {
+        name: String,
+        size: String,
+        url: String,
+    },
+    Audio {
+        duration: String,
+        url: String,
+    },
+    Video {
+        duration: String,
+        thumbnail_url: String,
+        video_url: String,
+    },
+    MediaGrid {
+        images: Vec<MediaItem>,
+        extra_count: usize,
+    },
+}
+
+#[derive(Clone, PartialEq, Debug)]
+pub struct ChatMessage {
+    pub id: String,
+    pub sender_id: String,
+    pub sender_name: String,
+    pub time: String,
+    pub is_outgoing: bool,
+    pub status: MessageStatus,
+    pub content: MessageContent,
+}
+
+#[derive(Clone, PartialEq, Debug)]
+pub struct ChatContact {
+    pub id: String,
+    pub name: String,
+    pub avatar_url: Option<String>,
+    pub initials: String,
+    pub is_online: bool,
+    pub is_group: bool,
+    pub last_message: String,
+    pub last_message_time: String,
+    pub last_message_sender: Option<String>,
+    pub status: MessageStatus,
+    pub unread_count: usize,
+}
+
+pub fn sample_contacts() -> Vec<ChatContact> {
+    vec![
+        ChatContact {
+            id: "jacquenetta".to_string(),
+            name: "Jacquenetta Slowgrave".to_string(),
+            avatar_url: Some("https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&auto=format&fit=crop&q=80".to_string()),
+            initials: "JS".to_string(),
+            is_online: true,
+            is_group: false,
+            last_message: "Great! Looking forward t..".to_string(),
+            last_message_time: "10 minutes".to_string(),
+            last_message_sender: None,
+            status: MessageStatus::Read,
+            unread_count: 3,
+        },
+        ChatContact {
+            id: "nickola".to_string(),
+            name: "Nickola Peever".to_string(),
+            avatar_url: Some("https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80".to_string()),
+            initials: "NP".to_string(),
+            is_online: true,
+            is_group: false,
+            last_message: "Sounds perfect! I've been wa..".to_string(),
+            last_message_time: "40 minutes".to_string(),
+            last_message_sender: None,
+            status: MessageStatus::Read,
+            unread_count: 0,
+        },
+        ChatContact {
+            id: "design_team".to_string(),
+            name: "Design Team".to_string(),
+            avatar_url: None,
+            initials: "DT".to_string(),
+            is_online: false,
+            is_group: true,
+            last_message: "The new mockups ar..".to_string(),
+            last_message_time: "09:40".to_string(),
+            last_message_sender: Some("Nickola".to_string()),
+            status: MessageStatus::Delivered,
+            unread_count: 1,
+        },
+        ChatContact {
+            id: "farand".to_string(),
+            name: "Farand Hume".to_string(),
+            avatar_url: None,
+            initials: "FH".to_string(),
+            is_online: true,
+            is_group: false,
+            last_message: "How about 7 PM at the new It..".to_string(),
+            last_message_time: "Yesterday".to_string(),
+            last_message_sender: None,
+            status: MessageStatus::Delivered,
+            unread_count: 0,
+        },
+        ChatContact {
+            id: "ossie".to_string(),
+            name: "Ossie Peasey".to_string(),
+            avatar_url: Some("https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&auto=format&fit=crop&q=80".to_string()),
+            initials: "OP".to_string(),
+            is_online: true,
+            is_group: false,
+            last_message: "Hey Bonnie, yes, definitely! W..".to_string(),
+            last_message_time: "13 days".to_string(),
+            last_message_sender: None,
+            status: MessageStatus::Delivered,
+            unread_count: 0,
+        },
+        ChatContact {
+            id: "hall".to_string(),
+            name: "Hall Negri".to_string(),
+            avatar_url: Some("https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=120&auto=format&fit=crop&q=80".to_string()),
+            initials: "HN".to_string(),
+            is_online: true,
+            is_group: false,
+            last_message: "No worries at all! I'll grab a ta..".to_string(),
+            last_message_time: "2 days".to_string(),
+            last_message_sender: None,
+            status: MessageStatus::Delivered,
+            unread_count: 0,
+        },
+        ChatContact {
+            id: "weekend_trip".to_string(),
+            name: "Weekend Trip 🏕️".to_string(),
+            avatar_url: None,
+            initials: "WT".to_string(),
+            is_online: false,
+            is_group: true,
+            last_message: "I'll bring the tent".to_string(),
+            last_message_time: "Yesterday".to_string(),
+            last_message_sender: Some("You".to_string()),
+            status: MessageStatus::Read,
+            unread_count: 0,
+        },
+        ChatContact {
+            id: "elyssa".to_string(),
+            name: "Elyssa Segot".to_string(),
+            avatar_url: Some("https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120&auto=format&fit=crop&q=80".to_string()),
+            initials: "ES".to_string(),
+            is_online: true,
+            is_group: false,
+            last_message: "She just told me today.".to_string(),
+            last_message_time: "Yesterday".to_string(),
+            last_message_sender: None,
+            status: MessageStatus::Read,
+            unread_count: 0,
+        },
+        ChatContact {
+            id: "gil".to_string(),
+            name: "Gil Wilfing".to_string(),
+            avatar_url: Some("https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=120&auto=format&fit=crop&q=80".to_string()),
+            initials: "GW".to_string(),
+            is_online: true,
+            is_group: false,
+            last_message: "See you in 5 minutes!".to_string(),
+            last_message_time: "1 day".to_string(),
+            last_message_sender: None,
+            status: MessageStatus::Delivered,
+            unread_count: 0,
+        },
+        ChatContact {
+            id: "bab".to_string(),
+            name: "Bab Cleaton".to_string(),
+            avatar_url: Some("https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=120&auto=format&fit=crop&q=80".to_string()),
+            initials: "BC".to_string(),
+            is_online: true,
+            is_group: false,
+            last_message: "If it takes long you can mail".to_string(),
+            last_message_time: "3 hours".to_string(),
+            last_message_sender: None,
+            status: MessageStatus::Delivered,
+            unread_count: 0,
+        },
+        ChatContact {
+            id: "janith".to_string(),
+            name: "Janith Satch".to_string(),
+            avatar_url: Some("https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=120&auto=format&fit=crop&q=80".to_string()),
+            initials: "JS".to_string(),
+            is_online: true,
+            is_group: false,
+            last_message: "Absolutely! It's amazing to se..".to_string(),
+            last_message_time: "1 day".to_string(),
+            last_message_sender: None,
+            status: MessageStatus::Read,
+            unread_count: 0,
+        },
+        ChatContact {
+            id: "biron".to_string(),
+            name: "Biron Alison".to_string(),
+            avatar_url: Some("https://images.unsplash.com/photo-1517841905240-472988babdf9?w=120&auto=format&fit=crop&q=80".to_string()),
+            initials: "BA".to_string(),
+            is_online: true,
+            is_group: false,
+            last_message: "Yeah, she mentioned it last w..".to_string(),
+            last_message_time: "1 day".to_string(),
+            last_message_sender: None,
+            status: MessageStatus::Read,
+            unread_count: 0,
+        },
+    ]
+}
+
+pub fn sample_messages_for(contact_id: &str) -> Vec<ChatMessage> {
+    match contact_id {
+        "jacquenetta" => vec![
+            ChatMessage {
+                id: "msg-1".to_string(),
+                sender_id: "me".to_string(),
+                sender_name: "You".to_string(),
+                time: "05:23 PM".to_string(),
+                is_outgoing: true,
+                status: MessageStatus::Read,
+                content: MessageContent::Document {
+                    name: "important_documents.pdf".to_string(),
+                    size: "50KB".to_string(),
+                    url: "#".to_string(),
+                },
+            },
+            ChatMessage {
+                id: "msg-2".to_string(),
+                sender_id: "me".to_string(),
+                sender_name: "You".to_string(),
+                time: "05:23 PM".to_string(),
+                is_outgoing: true,
+                status: MessageStatus::Read,
+                content: MessageContent::Audio {
+                    duration: "1:15".to_string(),
+                    url: "#".to_string(),
+                },
+            },
+            ChatMessage {
+                id: "msg-3".to_string(),
+                sender_id: "me".to_string(),
+                sender_name: "You".to_string(),
+                time: "05:23 PM".to_string(),
+                is_outgoing: true,
+                status: MessageStatus::Read,
+                content: MessageContent::Video {
+                    duration: "5:42".to_string(),
+                    thumbnail_url: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=600&auto=format&fit=crop&q=80".to_string(),
+                    video_url: "#".to_string(),
+                },
+            },
+            ChatMessage {
+                id: "msg-4".to_string(),
+                sender_id: "me".to_string(),
+                sender_name: "You".to_string(),
+                time: "05:23 PM".to_string(),
+                is_outgoing: true,
+                status: MessageStatus::Read,
+                content: MessageContent::MediaGrid {
+                    images: vec![
+                        MediaItem {
+                            url: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&auto=format&fit=crop&q=80".to_string(),
+                            title: "Laptop Glow".to_string(),
+                        },
+                        MediaItem {
+                            url: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=80".to_string(),
+                            title: "Cyber Helmet".to_string(),
+                        },
+                        MediaItem {
+                            url: "https://images.unsplash.com/photo-1593508512255-86ab42a8e620?w=500&auto=format&fit=crop&q=80".to_string(),
+                            title: "VR Gaming".to_string(),
+                        },
+                        MediaItem {
+                            url: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=500&auto=format&fit=crop&q=80".to_string(),
+                            title: "Robot Concept".to_string(),
+                        },
+                    ],
+                    extra_count: 2,
+                },
+            },
+            ChatMessage {
+                id: "msg-5".to_string(),
+                sender_id: "jacquenetta".to_string(),
+                sender_name: "Jacquenetta Slowgrave".to_string(),
+                time: "05:24 PM".to_string(),
+                is_outgoing: false,
+                status: MessageStatus::Read,
+                content: MessageContent::Text(
+                    "Great! Looking forward to reviewing these mockups during our sync call.".to_string(),
+                ),
+            },
+        ],
+        "nickola" => vec![
+            ChatMessage {
+                id: "nick-1".to_string(),
+                sender_id: "nickola".to_string(),
+                sender_name: "Nickola Peever".to_string(),
+                time: "04:45 PM".to_string(),
+                is_outgoing: false,
+                status: MessageStatus::Read,
+                content: MessageContent::Text(
+                    "Hey, did you have a chance to look at the revised sprint roadmap?".to_string(),
+                ),
+            },
+            ChatMessage {
+                id: "nick-2".to_string(),
+                sender_id: "me".to_string(),
+                sender_name: "You".to_string(),
+                time: "04:50 PM".to_string(),
+                is_outgoing: true,
+                status: MessageStatus::Read,
+                content: MessageContent::Text(
+                    "Yes, looks great! I will merge the PR this afternoon.".to_string(),
+                ),
+            },
+            ChatMessage {
+                id: "nick-3".to_string(),
+                sender_id: "nickola".to_string(),
+                sender_name: "Nickola Peever".to_string(),
+                time: "05:00 PM".to_string(),
+                is_outgoing: false,
+                status: MessageStatus::Read,
+                content: MessageContent::Text(
+                    "Sounds perfect! I've been waiting for this.".to_string(),
+                ),
+            },
+        ],
+        _ => vec![
+            ChatMessage {
+                id: "default-1".to_string(),
+                sender_id: contact_id.to_string(),
+                sender_name: "Contact".to_string(),
+                time: "Yesterday".to_string(),
+                is_outgoing: false,
+                status: MessageStatus::Read,
+                content: MessageContent::Text(
+                    "Hello! Let's catch up when you are free.".to_string(),
+                ),
+            },
+        ],
+    }
+}

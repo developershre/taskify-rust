@@ -325,7 +325,7 @@ pub fn EventChip(props: EventChipProps) -> Element {
 #[component]
 pub fn WeekdayHeader() -> Element {
     rsx! {
-        div { class: "grid grid-cols-7 border-b border-border/40",
+        div { class: "grid grid-cols-7 border-b border-border/40 shrink-0",
             for name in WEEKDAY_NAMES {
                 div {
                     key: "{name}",
@@ -395,7 +395,7 @@ pub fn DayCell(props: DayCellProps) -> Element {
 
     rsx! {
         div {
-            class: "flex min-h-12 sm:min-h-24 flex-col gap-1 border-b border-r border-border/40 p-1.5{click_class}",
+            class: "flex h-full min-h-0 flex-col gap-1 border-b border-r border-border/40 p-1 sm:p-1.5 overflow-hidden{click_class}",
             onclick: move |_| {
                 if let Some(handler) = &on_day_click {
                     handler.call(date);
@@ -419,11 +419,11 @@ pub fn DayCell(props: DayCellProps) -> Element {
                 }
             },
 
-            div { class: "flex h-6 items-center px-0.5",
+            div { class: "flex h-6 items-center px-0.5 shrink-0",
                 span { class: "inline-flex items-center justify-center text-xs {number_class}", "{day}" }
             }
 
-            div { class: "flex min-w-0 flex-col gap-1",
+            div { class: "flex min-w-0 flex-1 flex-col gap-1 overflow-hidden",
                 for event in events.iter().take(MAX_VISIBLE_EVENTS) {
                     EventChip {
                         key: "{event.id}",
@@ -436,11 +436,11 @@ pub fn DayCell(props: DayCellProps) -> Element {
                         dragging: dragging,
                     }
                 }
-            }
 
-            if hidden_count > 0 {
-                div { class: "px-1.5 text-[11px] font-medium text-muted-foreground",
-                    "+ {hidden_count} more"
+                if hidden_count > 0 {
+                    div { class: "px-1.5 text-[11px] font-medium text-muted-foreground shrink-0",
+                        "+ {hidden_count} more"
+                    }
                 }
             }
         }
@@ -499,7 +499,7 @@ pub fn CalendarToolbar(props: CalendarToolbarProps) -> Element {
     });
 
     rsx! {
-        div { class: "flex flex-wrap items-center justify-between gap-3 px-3 py-2.5 sm:px-4 sm:py-3",
+        div { class: "flex flex-wrap items-center justify-between gap-3 px-3 py-2.5 sm:px-4 sm:py-3 shrink-0",
 
             div { class: "flex items-center gap-1.5",
 
@@ -633,6 +633,7 @@ pub fn MonthGrid(props: MonthGridProps) -> Element {
 
     let total_cells = start_weekday as u32 + total_days;
     let grid_cells = if total_cells <= 35 { 35 } else { 42 };
+    let row_count = grid_cells / 7;
     let trailing_count = grid_cells - total_cells;
 
     let events_for = |date: (u32, u32, u32)| -> Vec<CalEvent> {
@@ -693,7 +694,8 @@ pub fn MonthGrid(props: MonthGridProps) -> Element {
 
     rsx! {
         div {
-            class: "grid grid-cols-7 [&>*:nth-child(7n)]:border-r-0 [&>*:nth-last-child(-n+7)]:border-b-0 {class}",
+            class: "grid grid-cols-7 h-full w-full min-h-0 flex-1 [&>*:nth-child(7n)]:border-r-0 [&>*:nth-last-child(-n+7)]:border-b-0 {class}",
+            style: "grid-template-rows: repeat({row_count}, minmax(0, 1fr));",
             {cells.into_iter()}
         }
     }

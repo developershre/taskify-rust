@@ -35,6 +35,15 @@ pub fn ComponentsCalendar() -> Element {
     let mut demo_day_open = use_signal(|| false);
     let mut demo_add_open = use_signal(|| false);
 
+    let overlay = use_context::<crate::state::OverlayState>();
+    use_effect(move || {
+        let open = *demo_day_open.read() || *demo_add_open.read();
+        overlay.set_dialog_open(open);
+    });
+    use_drop(move || {
+        overlay.set_dialog_open(false);
+    });
+
     let chip_demos = [
         ("Project Deadline", Some("1pm"), EventColor::Amber, true),
         ("Team Meeting", Some("10am"), EventColor::Sky, false),
@@ -100,7 +109,7 @@ pub fn ComponentsCalendar() -> Element {
             Section {
                 title: "DayCell".to_string(),
                 desc: "Single day column: today highlight, other-month days, event stack and overflow.".to_string(),
-                div { class: "grid grid-cols-2 sm:grid-cols-4 border-t border-l border-border/40",
+                div { class: "grid grid-cols-2 sm:grid-cols-4 border-t border-l border-border/40 min-h-28",
                     DayCell { date: (2026, 10, 6), events: events.iter().filter(|e| e.date == (2026, 10, 6)).cloned().collect() }
                     DayCell { date: (2026, 10, 7), is_today: true, events: events.iter().filter(|e| e.date == (2026, 10, 7)).cloned().collect() }
                     DayCell { date: (2026, 10, 12), events: events.iter().filter(|e| e.date == (2026, 10, 12)).cloned().collect() }
@@ -111,7 +120,7 @@ pub fn ComponentsCalendar() -> Element {
             Section {
                 title: "MonthGrid".to_string(),
                 desc: "Full month grid: leading/trailing days, today detection and per-day event filtering.".to_string(),
-                div { class: "rounded-xl border border-border/40 overflow-hidden",
+                div { class: "rounded-xl border border-border/40 overflow-hidden h-[600px]",
                     MonthGrid {
                         year: 2026,
                         month: 10,

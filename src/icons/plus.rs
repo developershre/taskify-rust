@@ -1,12 +1,19 @@
 use dioxus::prelude::*;
 
+#[derive(Props, Clone, PartialEq)]
+pub struct PlusIconProps {
+    #[props(default)]
+    pub class: String,
+}
+
 #[component]
-pub fn PlusIcon() -> Element {
+pub fn PlusIcon(props: PlusIconProps) -> Element {
     rsx! {
         svg {
             width: "24",
             height: "24",
             view_box: "0 0 24 24",
+            class: &props.class,
             fill: "none",
             xmlns: "http://www.w3.org/2000/svg",
 

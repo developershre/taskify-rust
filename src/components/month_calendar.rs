@@ -965,7 +965,7 @@ pub fn NewEventDialog(props: NewEventDialogProps) -> Element {
         }
     });
 
-    let field_class = "w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring z-1000";
+    let field_class = "w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
 
     rsx! {
         Dialog { open: open,

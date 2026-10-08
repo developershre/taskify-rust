@@ -21,15 +21,17 @@ extern "C" {
 }
 
 /// Releases freed heap memory back to the operating system on Linux
+#[cfg(target_os = "linux")]
 fn trim_memory() {
-    #[cfg(target_os = "linux")]
     unsafe {
         malloc_trim(0);
     }
 }
 
-fn main() {
-    // Periodically release unused heap memory back to the operating system
+/// Periodically releases freed heap memory back to the OS (Linux only —
+/// `malloc_trim` is a no-op elsewhere, so the thread isn't spawned at all).
+#[cfg(target_os = "linux")]
+fn spawn_trim_memory_thread() {
     std::thread::spawn(|| {
         std::thread::sleep(std::time::Duration::from_secs(4));
         trim_memory();
@@ -39,6 +41,11 @@ fn main() {
             trim_memory();
         }
     });
+}
+
+fn main() {
+    #[cfg(target_os = "linux")]
+    spawn_trim_memory_thread();
 
     dioxus::LaunchBuilder::desktop()
         .with_cfg(window::desktop_config())

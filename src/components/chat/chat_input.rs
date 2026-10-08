@@ -27,7 +27,7 @@ pub fn ChatInput(props: ChatInputProps) -> Element {
 
             // Quick emoji picker bubble if toggled
             if *show_emoji_picker.read() {
-                div { class: "absolute bottom-16 right-4 sm:right-28 flex items-center gap-1.5 p-2 rounded-2xl bg-popover border border-border shadow-lg z-20",
+                div { class: "absolute bottom-16 right-4 sm:right-28 flex items-center gap-1.5 p-2 rounded-2xl bg-popover border border-border shadow-lg z-10",
                     for emoji in emojis {
                         button {
                             key: "{emoji}",

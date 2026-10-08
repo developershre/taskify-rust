@@ -1,6 +1,10 @@
 mod all;
 mod archived;
 mod index;
+mod kanban;
+mod list;
+pub mod shared;
+mod table;
 mod urgent;
 
 pub use all::TasksAll;

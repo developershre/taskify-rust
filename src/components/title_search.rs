@@ -6,14 +6,19 @@ use crate::components::ui::{
     CommandShortcut,
 };
 use crate::icons::SearchIcon;
-use crate::state::{use_app_state, AppState};
+use crate::state::{use_app_state, use_calendar_sidebar_state, AppState, CalendarSidebarState};
 
 #[derive(Clone, Copy, PartialEq)]
 pub struct SearchContext {
     pub open: Signal<bool>,
 }
 
-fn run_action(name: &str, mut app_state: AppState, mut new_task: NewTaskForm) {
+fn run_action(
+    name: &str,
+    mut app_state: AppState,
+    calendar: CalendarSidebarState,
+    mut new_task: NewTaskForm,
+) {
     match name {
         "New Task" => new_task.open.set(true),
         "New Note" => {
@@ -21,9 +26,8 @@ fn run_action(name: &str, mut app_state: AppState, mut new_task: NewTaskForm) {
                 "Untitled note".to_string(),
                 "Write something worth keeping.".to_string(),
             );
-            let notes_open = *app_state.calendar_sidebar_open.read();
-            if !notes_open {
-                app_state.toggle_calendar_sidebar();
+            if !calendar.is_open() {
+                calendar.toggle();
             }
         }
         "Toggle Theme" => app_state.toggle_theme(),
@@ -40,6 +44,7 @@ pub fn TitleSearch() -> Element {
     let mut search = use_signal(String::new);
     let new_task = use_context::<NewTaskForm>();
     let app_state = use_app_state();
+    let calendar = use_calendar_sidebar_state();
     let router = router();
 
     let query = search().to_lowercase();
@@ -126,7 +131,7 @@ pub fn TitleSearch() -> Element {
                                     if !path.is_empty() {
                                         let _ = router.push(path);
                                     } else {
-                                        run_action(name, app_state, new_task);
+                                        run_action(name, app_state, calendar, new_task);
                                     }
                                     open.set(false);
                                     search.write().clear();
@@ -169,7 +174,7 @@ pub fn TitleSearch() -> Element {
                                     CommandItem {
                                         key: "{name}",
                                         onclick: move |_| {
-                                            run_action(name, app_state, new_task);
+                                            run_action(name, app_state, calendar, new_task);
                                             open.set(false);
                                             search.write().clear();
                                         },

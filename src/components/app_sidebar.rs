@@ -387,7 +387,7 @@ pub fn AppSidebar() -> Element {
                                     }
                                 }
                                 span {
-                                    class: "shrink-0 rounded-md bg-primary px-2 py-1 text-[10px] font-semibold text-primary-foreground",
+                                    class: "shrink-0 rounded-md bg-primary px-2 py-1 text-[10px] font-semibold text-primary-foreground grid place-items-center py-2",
                                     "Upgrade"
                                 }
                             }

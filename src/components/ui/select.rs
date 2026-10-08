@@ -205,7 +205,7 @@ pub fn SelectContent(props: SelectContentProps) -> Element {
     rsx! {
         // Transparent backdrop to close dropdown on clicking outside
         div {
-            class: "fixed inset-0 z-40 bg-transparent",
+            class: "fixed inset-0 z-30 bg-transparent",
             onmousedown: move |e| {
                 e.stop_propagation();
                 ctx.open.set(false);
@@ -218,7 +218,7 @@ pub fn SelectContent(props: SelectContentProps) -> Element {
 
         div {
             "data-popup": uid,
-            class: "fixed left-0 top-0 z-50 invisible",
+            class: "fixed left-0 top-0 z-30 invisible",
 
             div {
                 "data-slot": "select-content",

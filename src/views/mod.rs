@@ -7,7 +7,7 @@ mod mcp;
 mod projects;
 mod settings;
 
-mod tasks;
+pub mod tasks;
 
 pub use analytics::Analytics;
 pub use calendar::Calendar;

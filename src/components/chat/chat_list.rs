@@ -1,5 +1,9 @@
-use dioxus::prelude::*;
 use super::types::{ChatContact, MessageStatus};
+use crate::components::ui::dropdown_menu::DropdownMenuContext;
+use crate::components::ui::{
+    DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
+};
+use dioxus::prelude::*;
 
 #[derive(Props, Clone, PartialEq)]
 pub struct ChatListProps {
@@ -9,6 +13,8 @@ pub struct ChatListProps {
     #[props(default)]
     pub class: String,
 }
+
+use crate::icons::{PlusIcon, SearchIcon, TrashIcon};
 
 #[component]
 pub fn ChatList(props: ChatListProps) -> Element {
@@ -32,7 +38,7 @@ pub fn ChatList(props: ChatListProps) -> Element {
     rsx! {
         div {
             class: format!(
-                "flex flex-col h-full w-full sm:w-80 md:w-88 shrink-0 border-r border-border/40 bg-card/50 select-none overflow-hidden {}",
+                "flex flex-col h-full w-full sm:w-52 md:w-72 shrink-0 border border-border bg-card/50 select-none overflow-hidden rounded-md {}",
                 props.class
             ),
 
@@ -40,39 +46,41 @@ pub fn ChatList(props: ChatListProps) -> Element {
             div { class: "flex items-center justify-between p-3.5 pb-2.5 shrink-0",
                 h2 { class: "text-lg font-bold tracking-tight text-foreground", "Chats" }
 
-                button {
-                    r#type: "button",
-                    class: "inline-flex size-8 items-center justify-center rounded-full border border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors cursor-pointer",
-                    title: "New chat",
-                    onclick: move |_| {},
-                    svg {
-                        class: "size-4",
-                        view_box: "0 0 24 24",
-                        fill: "none",
-                        stroke: "currentColor",
-                        stroke_width: "2",
-                        stroke_linecap: "round",
-                        stroke_linejoin: "round",
-                        path { d: "M5 12h14" }
-                        path { d: "M12 5v14" }
+                DropdownMenu {
+                    DropdownMenuTrigger {
+                        button {
+                            r#type: "button",
+                            class: "inline-flex size-8 items-center justify-center rounded-sm border border-border/50 text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors cursor-pointer",
+                            title: "New chat",
+                            onclick: move |_| {},
+                            PlusIcon { class: "size-4" }
+                        }
+                    }
+                    DropdownMenuContent {
+                        align: "end",
+                        side: "bottom",
+                        side_offset: 6,
+                        DropdownMenuItem {
+                            onclick: move |_| {},
+                            "New chat"
+                        }
+                        DropdownMenuItem {
+                            onclick: move |_| {},
+                            "New group"
+                        }
+                        DropdownMenuItem {
+                            onclick: move |_| {},
+                            "New contact"
+                        }
                     }
                 }
+
             }
 
             // Search Bar
             div { class: "px-3.5 pb-3 shrink-0",
                 div { class: "relative flex items-center",
-                    svg {
-                        class: "absolute left-3 size-4 text-muted-foreground/60 pointer-events-none",
-                        view_box: "0 0 24 24",
-                        fill: "none",
-                        stroke: "currentColor",
-                        stroke_width: "2",
-                        stroke_linecap: "round",
-                        stroke_linejoin: "round",
-                        circle { cx: "11", cy: "11", r: "8" }
-                        path { d: "m21 21-4.3-4.3" }
-                    }
+                    SearchIcon { class: "absolute left-3 size-4 text-muted-foreground/60 pointer-events-none" }
                     input {
                         r#type: "text",
                         class: "w-full rounded-full border border-border/50 bg-background/60 pl-9 pr-3.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary/40 transition-all",
@@ -160,7 +168,7 @@ fn ChatListItem(props: ChatListItemProps) -> Element {
 
     rsx! {
         div {
-            class: "flex items-center gap-3 p-2.5 rounded-xl transition-colors cursor-pointer {active_class}",
+            class: "relative group/item flex items-center gap-3 p-2.5 rounded-xl transition-colors cursor-pointer {active_class}",
             onclick: move |_| on_select.call(id.clone()),
 
             // Avatar with online status
@@ -212,7 +220,7 @@ fn ChatListItem(props: ChatListItemProps) -> Element {
                     }
                 }
 
-                div { class: "flex items-center justify-between gap-2",
+                div { class: "relative flex items-center justify-between gap-2",
                     div { class: "flex items-center gap-1 min-w-0 truncate text-xs text-muted-foreground/90",
                         {status_tick}
 
@@ -230,6 +238,80 @@ fn ChatListItem(props: ChatListItemProps) -> Element {
                             "{contact.unread_count}"
                         }
                     }
+                }
+            }
+
+            ChatRowMenu {}
+        }
+    }
+}
+
+#[component]
+fn ChatRowMenu() -> Element {
+    rsx! {
+        div {
+            class: "absolute top-4 right-2 z-10",
+            DropdownMenu {
+            ChatMenuButton {}
+
+            DropdownMenuContent {
+                align: "end",
+                side_offset: 8,
+
+                DropdownMenuItem { "Mark as read" }
+                DropdownMenuItem { "Pin chat" }
+                DropdownMenuItem { "Mute notifications" }
+
+                DropdownMenuSeparator {}
+
+                DropdownMenuItem { "Archive chat" }
+                DropdownMenuItem {
+                    variant: "destructive",
+                    TrashIcon { class: "size-4" }
+                    span { "Delete chat" }
+                }
+            }
+        }
+        }
+    }
+}
+
+#[component]
+fn ChatMenuButton() -> Element {
+    let mut menu = use_context::<DropdownMenuContext>();
+    let is_open = (menu.open)();
+
+    let reveal_class = if is_open {
+        "opacity-100 pointer-events-auto"
+    } else {
+        "opacity-0 pointer-events-none group-hover/item:opacity-100 group-hover/item:pointer-events-auto"
+    };
+
+    rsx! {
+        div { class: "shrink-0 transition-opacity {reveal_class}",
+            button {
+                r#type: "button",
+                "data-slot": "dropdown-menu-trigger",
+                class: "inline-flex size-6 items-center justify-center rounded-full border border-border/40 bg-popover hover:bg-muted text-muted-foreground/70 shadow-xs hover:bg-muted hover:text-foreground transition-colors cursor-pointer outline-none",
+                title: "Chat options",
+
+                onmousedown: move |e| {
+                    e.stop_propagation();
+                },
+
+                onclick: move |e| {
+                    e.stop_propagation();
+                    let current = (menu.open)();
+                    menu.open.set(!current);
+                },
+
+                svg {
+                    class: "size-3",
+                    view_box: "0 0 24 24",
+                    fill: "currentColor",
+                    circle { cx: "5", cy: "12", r: "1.75" }
+                    circle { cx: "12", cy: "12", r: "1.75" }
+                    circle { cx: "19", cy: "12", r: "1.75" }
                 }
             }
         }

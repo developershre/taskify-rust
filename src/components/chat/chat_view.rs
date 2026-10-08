@@ -18,8 +18,8 @@ pub struct ChatViewProps {
 #[component]
 pub fn ChatView(props: ChatViewProps) -> Element {
     let mut contacts = use_signal(sample_contacts);
-    let mut selected_id = use_signal(|| "jacquenetta".to_string());
-    let mut mobile_show_chat = use_signal(|| true);
+    let mut selected_id = use_signal(String::new);
+    let mut mobile_show_chat = use_signal(|| false);
 
     let mut messages_by_contact = use_signal(|| {
         let mut map: HashMap<String, Vec<ChatMessage>> = HashMap::new();
@@ -92,7 +92,7 @@ pub fn ChatView(props: ChatViewProps) -> Element {
     rsx! {
         div {
             class: format!(
-                "flex h-full w-full min-h-0 overflow-hidden rounded-2xl border border-border/40 bg-card shadow-xs select-none {}",
+                "z-0 flex h-full w-full min-h-0 overflow-hidden select-none {}",
                 props.class
             ),
 
@@ -104,41 +104,84 @@ pub fn ChatView(props: ChatViewProps) -> Element {
                 on_select: on_select_contact,
             }
 
-            // Right Panel: Active Conversation
+            // Right Panel: Active Conversation (only when a chat is selected)
             div {
                 class: format!(
                     "flex-1 min-w-0 flex flex-col h-full bg-background/50 overflow-hidden {}",
                     conversation_class
                 ),
 
-                // Conversation Header
-                ChatHeader {
-                    contact: current_contact,
-                    on_back: move |_| mobile_show_chat.set(false),
-                }
+                if current_contact.is_some() {
+                    // Conversation Header
+                    ChatHeader {
+                        contact: current_contact,
+                        on_back: move |_| mobile_show_chat.set(false),
+                    }
 
-                // Messages Timeline Stream
-                div { class: "flex-1 min-h-0 overflow-y-auto p-4 sm:p-5 flex flex-col gap-4",
+                    // Messages Timeline Stream
+                    div { class: "flex-1 min-h-0 overflow-y-auto p-4 sm:p-5 flex flex-col gap-4",
 
-                    // Date / Time Divider Badge
-                    div { class: "flex items-center justify-center my-2",
-                        span { class: "rounded-full bg-muted/60 px-3 py-1 text-[11px] font-medium text-muted-foreground select-none",
-                            "05:23 PM"
+                        // Date / Time Divider Badge
+                        div { class: "flex items-center justify-center my-2",
+                            span { class: "rounded-full bg-muted/60 px-3 py-1 text-[11px] font-medium text-muted-foreground select-none",
+                                "05:23 PM"
+                            }
+                        }
+
+                        for msg in current_messages {
+                            MessageBubble {
+                                key: "{msg.id}",
+                                message: msg,
+                            }
                         }
                     }
 
-                    for msg in current_messages {
-                        MessageBubble {
-                            key: "{msg.id}",
-                            message: msg,
-                        }
+                    // Bottom Input Field
+                    ChatInput {
+                        on_send: on_send_message,
                     }
+                } else {
+                    NoChatSelected {}
                 }
+            }
+        }
+    }
+}
 
-                // Bottom Input Field
-                ChatInput {
-                    on_send: on_send_message,
+#[component]
+fn NoChatSelected() -> Element {
+    rsx! {
+        div { class: "flex-1 min-h-0 flex flex-col items-center justify-center gap-5 p-8 text-center",
+
+            div { class: "flex size-12 items-center justify-center rounded-xl bg-muted text-foreground",
+                svg {
+                    class: "size-6",
+                    view_box: "0 0 24 24",
+                    fill: "none",
+                    stroke: "currentColor",
+                    stroke_width: "1.75",
+                    stroke_linecap: "round",
+                    stroke_linejoin: "round",
+                    path { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" }
+                    path { d: "M13 10h6" }
+                    path { d: "m16 7 3 3-3 3" }
                 }
+            }
+
+            div { class: "flex flex-col gap-2",
+                h3 { class: "text-base font-semibold text-foreground",
+                    "No Chat Selected"
+                }
+                p { class: "max-w-xs sm:max-w-sm text-sm leading-relaxed text-muted-foreground",
+                    "Select a conversation from the list to read and reply, or start a new chat with one of your contacts."
+                }
+            }
+
+            button {
+                r#type: "button",
+                class: "rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer",
+                onclick: move |_| {},
+                "Start New Chat"
             }
         }
     }

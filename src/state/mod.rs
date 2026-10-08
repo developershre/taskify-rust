@@ -1,10 +1,14 @@
 use dioxus::prelude::*;
 
+pub mod calendar_sidebar_state;
 pub mod overlay_state;
 pub mod tasks_state;
 
+pub use calendar_sidebar_state::{
+    init_calendar_sidebar_state, use_calendar_sidebar_state, CalendarSidebarState,
+};
 pub use overlay_state::{use_overlay_state, OverlayState};
-pub use tasks_state::{TaskItem, TaskPriority, TaskStatus};
+pub use tasks_state::{SubTask, TaskItem, TaskPriority, TaskStatus};
 use tasks_state::initial_tasks;
 
 use crate::components::month_calendar::CalEvent;
@@ -77,8 +81,8 @@ pub struct AppState {
     pub calendar_events: Signal<Vec<CalEvent>>,
     pub real_today: Signal<(u32, u32, u32)>,
     pub sidebar_open: Signal<bool>,
-    pub calendar_sidebar_open: Signal<bool>,
     pub new_note_open: Signal<bool>,
+    pub board_columns: Signal<Vec<String>>,
 }
 
 impl AppState {
@@ -127,11 +131,6 @@ impl AppState {
     pub fn toggle_sidebar(&mut self) {
         let cur = *self.sidebar_open.read();
         self.sidebar_open.set(!cur);
-    }
-
-    pub fn toggle_calendar_sidebar(&mut self) {
-        let cur = *self.calendar_sidebar_open.read();
-        self.calendar_sidebar_open.set(!cur);
     }
 
     // Notes management
@@ -212,6 +211,17 @@ pub fn get_real_current_date() -> (u32, u32, u32) {
 // Initialization Hook
 // ============================================================
 
+/// Extracts the `"date":"Y-M-D"` field sent by the startup JS eval.
+fn parse_date_field(msg: &str) -> Option<(u32, u32, u32)> {
+    let rest = msg.split("\"date\":\"").nth(1)?;
+    let value = rest.split('"').next()?;
+    let mut parts = value.split('-');
+    let y = parts.next()?.parse().ok()?;
+    let m = parts.next()?.parse().ok()?;
+    let d = parts.next()?.parse().ok()?;
+    Some((y, m, d))
+}
+
 pub fn use_init_app_state() -> AppState {
     let real_now = get_real_current_date();
     let mut theme = use_signal(|| ThemeMode::System);
@@ -227,8 +237,15 @@ pub fn use_init_app_state() -> AppState {
     let calendar_events = use_signal(crate::views::calendar::sample_events);
     let mut real_today = use_signal(move || real_now);
     let sidebar_open = use_signal(|| true);
-    let calendar_sidebar_open = use_signal(|| true);
+    let calendar_sidebar = init_calendar_sidebar_state();
     let new_note_open = use_signal(|| false);
+    let board_columns = use_signal(|| {
+        vec![
+            "Backlog".to_string(),
+            "In Progress".to_string(),
+            "Completed".to_string(),
+        ]
+    });
 
     let state = AppState {
         theme,
@@ -244,8 +261,8 @@ pub fn use_init_app_state() -> AppState {
         calendar_events,
         real_today,
         sidebar_open,
-        calendar_sidebar_open,
         new_note_open,
+        board_columns,
     };
 
     use_context_provider(|| state);
@@ -268,7 +285,12 @@ pub fn use_init_app_state() -> AppState {
                     document.documentElement.classList.remove('dark');
                 }
 
-                dioxus.send(JSON.stringify({ mode: mode, system_dark: systemDark }));
+                const now = new Date();
+                dioxus.send(JSON.stringify({
+                    mode: mode,
+                    system_dark: systemDark,
+                    date: `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`
+                }));
 
                 mq.addEventListener('change', (e) => {
                     const currentSaved = localStorage.getItem('taskify-theme') || 'system';
@@ -299,38 +321,19 @@ pub fn use_init_app_state() -> AppState {
                 } else if msg.contains("\"mode\":\"system\"") {
                     theme.set(ThemeMode::System);
                 }
-            }
-        });
 
-        let mut date_eval = document::eval(
-            r#"
-            try {
-                const now = new Date();
-                dioxus.send(`${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`);
-            } catch (e) {}
-            "#,
-        );
-
-        spawn(async move {
-            if let Ok(date_str) = date_eval.recv::<String>().await {
-                let parts: Vec<&str> = date_str.split('-').collect();
-                if parts.len() == 3 {
-                    if let (Ok(y), Ok(m), Ok(d)) = (
-                        parts[0].parse::<u32>(),
-                        parts[1].parse::<u32>(),
-                        parts[2].parse::<u32>(),
-                    ) {
-                        real_today.set((y, m, d));
-                        selected_date.set(Some((y, m, d)));
-                    }
+                if let Some((y, m, d)) = parse_date_field(&msg) {
+                    real_today.set((y, m, d));
+                    selected_date.set(Some((y, m, d)));
                 }
             }
         });
 
         // Responsive drawer state: force-close sidebars when the window is
-        // too narrow for the in-flow layout, restore defaults on first sizing report.
+        // too narrow for the in-flow layout. The calendar sidebar defaults to
+        // closed, so it is only ever force-closed here — never force-opened.
         let mut side = state.sidebar_open;
-        let mut right = state.calendar_sidebar_open;
+        let mut right = calendar_sidebar.open;
         let mut size_eval = document::eval(
             r#"
             try {
@@ -357,8 +360,8 @@ pub fn use_init_app_state() -> AppState {
                 if first || narrow {
                     side.set(!narrow);
                 }
-                if first || right_hidden {
-                    right.set(!right_hidden);
+                if right_hidden {
+                    right.set(false);
                 }
                 first = false;
             }

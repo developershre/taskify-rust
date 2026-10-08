@@ -119,7 +119,7 @@ pub fn Sidebar(props: SidebarProps) -> Element {
     };
 
     let mobile_class = if is_open {
-        "max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-40 max-md:bg-sidebar max-md:border-r max-md:border-sidebar-border max-md:shadow-2xl"
+        "max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-10 max-md:bg-sidebar max-md:border-r max-md:border-sidebar-border max-md:shadow-2xl"
     } else {
         "max-md:hidden"
     };
@@ -635,7 +635,7 @@ pub fn SidebarRail(props: SidebarRailProps) -> Element {
             tabindex: -1,
             r#type: "button",
             class: format!(
-                "absolute inset-y-0 right-0 z-20 hidden w-1 -mr-0.5 cursor-ew-resize \
+                "absolute inset-y-0 right-0 z-10 hidden w-1 -mr-0.5 cursor-ew-resize \
                          hover:bg-sidebar-border transition-colors sm:flex {}",
                 props.class,
             ),

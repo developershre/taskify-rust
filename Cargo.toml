@@ -11,9 +11,6 @@ dioxus = { version = "0.7.1", features = ["router"] }
 image = { version = "0.25.10", default-features = false, features = ["png"] }
 mimalloc = { version = "0.1", default-features = false }
 
-[build-dependencies]
-winres = "0.1"
-
 [features]
 default = ["desktop"]
 # The feature that are only required for the web = ["dioxus/web"] build target should be optional and only enabled in the web = ["dioxus/web"] feature
@@ -23,6 +20,11 @@ desktop = ["dioxus/desktop"]
 # The feature that are only required for the mobile = ["dioxus/mobile"] build target should be optional and only enabled in the mobile = ["dioxus/mobile"] feature
 mobile = ["dioxus/mobile"]
 
+# Dependencies run near-release speed under `dx serve` (one-time recompile).
+[profile.dev.package."*"]
+opt-level = 2
+
+# Shipping profile: max runtime speed, small fast-loading binary.
 [profile.release]
 opt-level = 3
 lto = true

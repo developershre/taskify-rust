@@ -5,10 +5,14 @@ use crate::components::ui::{
     DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator,
     DropdownMenuShortcut, DropdownMenuTrigger, Switch,
 };
-use crate::components::user::User;
-use crate::components::{SearchContext, TitleSearch};
+use crate::components::task_detail::TaskDetailContext;
+use crate::components::user::{NotificationsContext, User};
+use crate::components::{SearchContext, TaskDetailDialog, TitleSearch};
 use crate::icons::{CloseIcon, MaximizeIcon, MinimizeIcon, MoonIcon, RestoreIcon, SunIcon};
-use crate::state::{get_real_current_date, use_app_state, AppState, OverlayState, TaskPriority, ThemeMode};
+use crate::state::{
+    get_real_current_date, use_app_state, use_calendar_sidebar_state, AppState, OverlayState,
+    TaskPriority, ThemeMode,
+};
 
 /// Shared state for the New Task dialog (titlebar provides, command palette consumes).
 #[derive(Clone, Copy, PartialEq)]
@@ -64,6 +68,7 @@ fn set_zoom(mut zoom: Signal<u32>, pct: u32) {
 #[component]
 pub fn TitleBar() -> Element {
     let mut app_state = use_app_state();
+    let calendar = use_calendar_sidebar_state();
     let mut search_open = app_state.search_open;
     use_context_provider(|| SearchContext { open: search_open });
 
@@ -77,6 +82,13 @@ pub fn TitleBar() -> Element {
     };
     use_context_provider(|| new_task);
 
+    let mut notifications_open = use_signal(|| false);
+    use_context_provider(|| NotificationsContext { open: notifications_open });
+
+    let mut detail_open = use_signal(|| false);
+    let detail_task_id = use_signal(|| Option::<String>::None);
+    use_context_provider(|| TaskDetailContext { open: detail_open, task_id: detail_task_id });
+
     let mut show_shortcuts = use_signal(|| false);
     let mut show_about = use_signal(|| false);
     let mut is_maximized = use_signal(|| false);
@@ -84,7 +96,11 @@ pub fn TitleBar() -> Element {
 
     let overlay = use_context::<OverlayState>();
     use_effect(move || {
-        let open = *new_task.open.read() || *show_shortcuts.read() || *show_about.read();
+        let open = *new_task.open.read()
+            || *show_shortcuts.read()
+            || *show_about.read()
+            || *notifications_open.read()
+            || *detail_open.read();
         overlay.set_dialog_open(open);
     });
 
@@ -168,12 +184,14 @@ pub fn TitleBar() -> Element {
                         new_task.open.set(false);
                         show_shortcuts.set(false);
                         show_about.set(false);
+                        notifications_open.set(false);
+                        detail_open.set(false);
                     }
                     "task.new" => {
                         new_task.open.set(true);
                     }
                     "notes.toggle" => {
-                        app_state.toggle_calendar_sidebar();
+                        calendar.toggle();
                     }
                     "theme.toggle" => {
                         app_state.toggle_theme();
@@ -209,7 +227,7 @@ pub fn TitleBar() -> Element {
 
     rsx! {
             div {
-                class: "{theme_root_class} fixed top-0 left-0 flex flex-col h-screen w-screen overflow-hidden bg-background text-foreground select-none",
+                class: "{theme_root_class} z-0 fixed top-0 left-0 flex flex-col h-screen w-screen overflow-hidden bg-background text-foreground select-none",
 
                 header {
                     class: "w-full flex items-center p-2 bg-background border-b border-border/40 shrink-0",
@@ -257,9 +275,8 @@ pub fn TitleBar() -> Element {
                                         "Untitled note".to_string(),
                                         "Write something worth keeping.".to_string(),
                                     );
-                                    let notes_open = *app_state.calendar_sidebar_open.read();
-                                    if !notes_open {
-                                        app_state.toggle_calendar_sidebar();
+                                    if !calendar.is_open() {
+                                        calendar.toggle();
                                     }
                                 },
                                 span { "New Note" }
@@ -347,7 +364,7 @@ pub fn TitleBar() -> Element {
                                 DropdownMenuShortcut { "Ctrl+B" }
                             }
                             DropdownMenuItem {
-                                onclick: move |_| app_state.toggle_calendar_sidebar(),
+                                onclick: move |_| calendar.toggle(),
                                 span { "Toggle Notes Panel" }
                                 DropdownMenuShortcut { "Ctrl+Shift+N" }
                             }
@@ -736,6 +753,8 @@ pub fn TitleBar() -> Element {
                     }
                 }
             }
+
+            TaskDetailDialog {}
         }
     }
 }

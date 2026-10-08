@@ -146,7 +146,7 @@ pub fn TooltipContent(props: TooltipContentProps) -> Element {
     rsx! {
         div {
             "data-popup": uid,
-            class: "fixed left-0 top-0 z-50 invisible pointer-events-none",
+            class: "fixed left-0 top-0 z-30 invisible pointer-events-none",
 
             div {
                 "data-slot": "tooltip-content",

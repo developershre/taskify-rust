@@ -1,5 +1,5 @@
 use crate::components::ui::{Calendar, Item, ItemActions, ItemContent, ItemDescription, ItemTitle};
-use crate::state::{use_app_state, OverlayState};
+use crate::state::{use_app_state, use_calendar_sidebar_state, OverlayState};
 use dioxus::prelude::*;
 
 #[derive(Props, Clone, PartialEq)]
@@ -13,7 +13,8 @@ use crate::icons::EditIcon;
 #[component]
 pub fn CalendarSidebar(props: CalendarSidebarProps) -> Element {
     let mut app_state = use_app_state();
-    let is_open = *app_state.calendar_sidebar_open.read();
+    let calendar = use_calendar_sidebar_state();
+    let is_open = calendar.is_open();
     let overlay = use_context::<OverlayState>();
 
     // Active action menu id
@@ -51,7 +52,7 @@ pub fn CalendarSidebar(props: CalendarSidebarProps) -> Element {
     rsx! {
         aside {
             class: format!(
-                "w-60 sm:w-72 shrink-0 rounded-2xl border border-border/40 bg-card p-4 flex flex-col h-full overflow-y-auto select-none shadow-xs gap-5 transition-all duration-300 isolate max-xl:fixed max-xl:inset-y-0 max-xl:right-0 max-xl:z-20 max-xl:rounded-none max-xl:w-72 max-xl:shadow-2xl {}",
+                "z-0 w-60 sm:w-72 shrink-0 rounded-2xl border border-border/40 bg-card p-4 flex flex-col h-full overflow-y-auto select-none shadow-xs gap-5 transition-all duration-300 isolate max-xl:fixed max-xl:inset-y-0 max-xl:right-0 max-xl:rounded-none max-xl:w-72 max-xl:shadow-2xl {}",
                 props.class,
             ),
 
@@ -114,7 +115,7 @@ pub fn CalendarSidebar(props: CalendarSidebarProps) -> Element {
                             rsx! {
 
                                 div { key: "{note.id}", "data-popup-anchor": "true",
-        
+
                                     Item {
                                         ItemContent {
                                             ItemTitle { "{note.title}" }
@@ -139,11 +140,11 @@ pub fn CalendarSidebar(props: CalendarSidebarProps) -> Element {
                                             }
                                         }
                                     }
-        
+
                                     if is_menu_open {
                                         div {
                                             "data-popup": format!("note-{}", note.id),
-                                            class: "fixed left-0 top-0 z-50 invisible",
+                                            class: "fixed left-0 top-0 z-30 invisible",
                                             div { class: "w-28 rounded-lg border border-border bg-popover text-popover-foreground p-1 flex flex-col gap-0.5 animate-in fade-in-50 zoom-in-95",
                                                 button {
                                                     class: "w-full text-left px-2 py-1 text-xs rounded hover:bg-muted text-foreground transition-colors cursor-pointer",

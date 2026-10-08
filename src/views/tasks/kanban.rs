@@ -2,23 +2,13 @@ use dioxus::prelude::*;
 
 use crate::components::TaskDetailContext;
 use crate::components::ui::Badge;
-use crate::icons::{CalendarIcon, CloseIcon, TrashIcon};
-use crate::state::{use_app_state, AppState, TaskItem, TaskStatus};
+use crate::icons::{CalendarIcon, CloseIcon, EditIcon, TrashIcon};
+use crate::state::{column_status, use_app_state, AppState, TaskItem, TaskStatus};
 
 use super::shared::{format_due, TaskCheck};
 
 /// Movement (in pixels) required before a mousedown turns into a real drag.
 const DRAG_THRESHOLD: f64 = 3.0;
-
-/// Map a board column name to the matching task status.
-fn column_status(name: &str) -> TaskStatus {
-    match name {
-        "Backlog" => TaskStatus::Backlog,
-        "In Progress" => TaskStatus::InProgress,
-        "Completed" => TaskStatus::Completed,
-        other => TaskStatus::Custom(other.to_string()),
-    }
-}
 
 /// Validate + commit a new column name, then reset the composer.
 fn commit_column(mut app_state: AppState, mut new_col: Signal<String>, mut adding: Signal<bool>) {
@@ -70,6 +60,35 @@ fn reset_task_composer(
     subs.set(Vec::new());
     sub_input.set(String::new());
     adding.set(None);
+}
+
+/// Begin renaming a column (prefills the inline input).
+fn start_rename(
+    name: String,
+    mut rename_input: Signal<String>,
+    mut renaming: Signal<Option<String>>,
+) {
+    rename_input.set(name.clone());
+    renaming.set(Some(name));
+}
+
+/// Commit the inline rename; stays open on empty/duplicate names.
+fn commit_rename(
+    mut app_state: AppState,
+    index: usize,
+    mut rename_input: Signal<String>,
+    mut renaming: Signal<Option<String>>,
+) {
+    let name = rename_input.read().trim().to_string();
+    if name.is_empty() {
+        renaming.set(None);
+        rename_input.set(String::new());
+        return;
+    }
+    if app_state.rename_board_column(index, name) {
+        renaming.set(None);
+        rename_input.set(String::new());
+    }
 }
 
 /// Live state of the card currently being dragged.
@@ -150,6 +169,7 @@ fn KanbanCard(
                     },
                 ),
             onmousedown: move |e| {
+                e.stop_propagation();
                 suppress.set(false);
                 // A card press cancels any in-flight column drag.
                 col_drag.set(None);
@@ -258,8 +278,12 @@ pub fn KanbanBoard(tasks: Vec<TaskItem>) -> Element {
     let mut nt_title = use_signal(String::new);
     let mut nt_subs = use_signal(Vec::<String>::new);
     let mut nt_sub_input = use_signal(String::new);
+    // Inline column rename state (keyed by column name).
+    let mut renaming: Signal<Option<String>> = use_signal(|| None);
+    let mut rename_input = use_signal(String::new);
 
     let column_names: Vec<String> = app_state.board_columns.read().clone();
+    let col_total = column_names.len();
     let columns: Vec<(String, TaskStatus, Vec<TaskItem>, usize)> = column_names
         .iter()
         .enumerate()
@@ -354,7 +378,11 @@ pub fn KanbanBoard(tasks: Vec<TaskItem>) -> Element {
                         .is_some_and(|c| c.moved && c.index == idx);
                     let is_col_over =
                         cd_state.as_ref().is_some_and(|c| c.moved && c.over == Some(idx));
+                    let is_renaming = renaming.read().as_deref() == Some(col_name.as_str());
                     let cd_name = col_name.clone();
+                    let rn_start = col_name.clone();
+                    let rn_btn = col_name.clone();
+                    let d_name = col_name.clone();
                     let open_col = col_name.clone();
                     let ck_enter = col_name.clone();
                     let ck_btn = col_name.clone();
@@ -364,7 +392,7 @@ pub fn KanbanBoard(tasks: Vec<TaskItem>) -> Element {
 
                     rsx! {
                         div { key: "{col_name}", class: format!(
-                                "flex w-72 min-h-0 shrink-0 flex-col gap-3 {}",
+                                "flex w-72 min-h-0 shrink-0 cursor-grab flex-col gap-3 {}",
                                 if is_col_dragged {
                                     "opacity-40"
                                 } else if is_col_over {
@@ -373,6 +401,23 @@ pub fn KanbanBoard(tasks: Vec<TaskItem>) -> Element {
                                     ""
                                 },
                             ),
+
+                            // Grabbing anywhere on the column starts a re-order
+                            // drag (cards/buttons/composer stop propagation).
+                            onmousedown: move |e| {
+                                drag.set(None);
+                                let p = e.client_coordinates();
+                                col_drag.set(Some(ColDrag {
+                                    index: idx,
+                                    name: cd_name.clone(),
+                                    x: p.x,
+                                    y: p.y,
+                                    start_x: p.x,
+                                    start_y: p.y,
+                                    moved: false,
+                                    over: Some(idx),
+                                }));
+                            },
 
                             // This column is a drop target while dragging a task,
                             // and a re-order target while dragging a column.
@@ -434,27 +479,88 @@ pub fn KanbanBoard(tasks: Vec<TaskItem>) -> Element {
                                 }
                             },
 
-                            div {
-                                class: "flex cursor-grab select-none items-center gap-2 px-1",
-                                // Grabbing the header starts a column re-order drag.
-                                onmousedown: move |e| {
-                                    drag.set(None);
-                                    let p = e.client_coordinates();
-                                    col_drag.set(Some(ColDrag {
-                                        index: idx,
-                                        name: cd_name.clone(),
-                                        x: p.x,
-                                        y: p.y,
-                                        start_x: p.x,
-                                        start_y: p.y,
-                                        moved: false,
-                                        over: Some(idx),
-                                    }));
-                                },
+                            div { class: "group flex select-none items-center gap-2 px-1",
                                 span { class: "size-2 shrink-0 rounded-full {dot_class}" }
-                                span { class: "text-sm font-semibold text-foreground", "{col_name}" }
+
+                                if is_renaming {
+                                    input {
+                                        r#type: "text",
+                                        class: "h-7 min-w-0 flex-1 rounded-md border border-input bg-background px-2 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                                        placeholder: "Column name",
+                                        value: "{rename_input}",
+                                        autofocus: true,
+                                        onmousedown: move |e| {
+                                            e.stop_propagation();
+                                        },
+                                        oninput: move |e| rename_input.set(e.value()),
+                                        onkeydown: move |e: KeyboardEvent| {
+                                            match e.key() {
+                                                Key::Enter => commit_rename(
+                                                    app_state,
+                                                    idx,
+                                                    rename_input,
+                                                    renaming,
+                                                ),
+                                                Key::Escape => {
+                                                    renaming.set(None);
+                                                    rename_input.set(String::new());
+                                                }
+                                                _ => {}
+                                            }
+                                        },
+                                    }
+                                } else {
+                                    span {
+                                        class: "min-w-0 truncate text-sm font-semibold text-foreground",
+                                        title: "Double-click to rename",
+                                        ondoubleclick: move |_| {
+                                            start_rename(rn_start.clone(), rename_input, renaming);
+                                        },
+                                        "{col_name}"
+                                    }
+                                }
+
                                 span { class: "rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground",
                                     "{count}"
+                                }
+
+                                div { class: "ml-auto flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100",
+                                    button {
+                                        r#type: "button",
+                                        class: "flex size-5 shrink-0 cursor-pointer items-center justify-center rounded text-muted-foreground transition-colors hover:bg-accent hover:text-foreground",
+                                        title: "Rename column",
+                                        onmousedown: move |e| {
+                                            e.stop_propagation();
+                                        },
+                                        onclick: move |_| {
+                                            start_rename(rn_btn.clone(), rename_input, renaming);
+                                        },
+                                        EditIcon { class: "size-3.5" }
+                                    }
+
+                                    if col_total > 1 {
+                                        button {
+                                            r#type: "button",
+                                            class: "flex size-5 shrink-0 cursor-pointer items-center justify-center rounded text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive",
+                                            title: "Delete column",
+                                            onmousedown: move |e| {
+                                                e.stop_propagation();
+                                            },
+                                            onclick: move |_| {
+                                                if renaming.read().as_deref() == Some(d_name.as_str()) {
+                                                    renaming.set(None);
+                                                }
+                                                app_state.delete_board_column(idx);
+                                                reset_task_composer(
+                                                    nt_title,
+                                                    nt_subs,
+                                                    nt_sub_input,
+                                                    adding_task,
+                                                );
+                                            },
+                                            TrashIcon { class: "size-3.5" }
+                                        }
+                                    }
                                 }
                             }
 
@@ -485,7 +591,12 @@ pub fn KanbanBoard(tasks: Vec<TaskItem>) -> Element {
                                 {
                                     let staged: Vec<String> = nt_subs.read().clone();
                                     rsx! {
-                                        div { class: "flex flex-col gap-2 rounded-xl border border-primary/50 bg-muted/30 p-2",
+                                        div {
+                                            class: "flex flex-col gap-2 rounded-xl border border-primary/50 bg-muted/30 p-2",
+                                            // Keep composer interactions out of the column drag.
+                                            onmousedown: move |e| {
+                                                e.stop_propagation();
+                                            },
                                             input {
                                                 r#type: "text",
                                                 class: "h-8 w-full rounded-md border border-input bg-background px-2.5 text-xs text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
@@ -599,6 +710,9 @@ pub fn KanbanBoard(tasks: Vec<TaskItem>) -> Element {
                                 button {
                                     r#type: "button",
                                     class: "flex w-full cursor-pointer items-center gap-1.5 rounded-lg border border-dashed border-border/50 bg-muted/20 px-2.5 py-2 text-[11px] text-muted-foreground transition-colors hover:border-primary hover:text-primary",
+                                    onmousedown: move |e| {
+                                        e.stop_propagation();
+                                    },
                                     onclick: move |_| adding_task.set(Some(open_col.clone())),
                                     svg {
                                         class: "size-3",

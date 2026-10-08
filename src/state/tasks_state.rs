@@ -85,6 +85,31 @@ pub struct TaskItem {
     pub subtasks: Vec<SubTask>,
 }
 
+/// Map a board column name to the matching task status.
+pub fn column_status(name: &str) -> TaskStatus {
+    match name {
+        "Backlog" => TaskStatus::Backlog,
+        "In Progress" => TaskStatus::InProgress,
+        "Completed" => TaskStatus::Completed,
+        other => TaskStatus::Custom(other.to_string()),
+    }
+}
+
+/// Move every task from one column status to another.
+/// `completed` is preserved, except it is forced on for Completed.
+fn remap_tasks(mut tasks: Signal<Vec<TaskItem>>, from: &TaskStatus, to: &TaskStatus) {
+    if from == to {
+        return;
+    }
+    let mut list = tasks.write();
+    for task in list.iter_mut().filter(|t| t.status == *from) {
+        task.status = to.clone();
+        if *to == TaskStatus::Completed {
+            task.completed = true;
+        }
+    }
+}
+
 impl AppState {
     /// Timestamp-based id for a freshly created task.
     fn new_task_id() -> String {
@@ -241,6 +266,64 @@ impl AppState {
         let name = cols.remove(from);
         let to = to.min(cols.len());
         cols.insert(to, name);
+    }
+
+    /// Rename a board column and remap its tasks to the new status.
+    /// Returns `false` for empty or duplicate (case-insensitive) names.
+    pub fn rename_board_column(&mut self, index: usize, new_name: String) -> bool {
+        let new_name = new_name.trim().to_string();
+        if new_name.is_empty() {
+            return false;
+        }
+        let (old_status, new_status);
+        {
+            let mut cols = self.board_columns.write();
+            if index >= cols.len()
+                || cols
+                    .iter()
+                    .enumerate()
+                    .any(|(i, c)| i != index && c.eq_ignore_ascii_case(&new_name))
+            {
+                return false;
+            }
+            let old_name = cols[index].clone();
+            if old_name == new_name {
+                return true;
+            }
+            cols[index] = new_name.clone();
+            old_status = column_status(&old_name);
+            new_status = column_status(&new_name);
+        }
+        remap_tasks(self.tasks, &old_status, &new_status);
+        true
+    }
+
+    /// Delete a board column (always keeps at least one). Its tasks move to
+    /// Backlog, or to the first non-Completed column when Backlog is deleted.
+    pub fn delete_board_column(&mut self, index: usize) -> bool {
+        let removed = {
+            let mut cols = self.board_columns.write();
+            if cols.len() <= 1 || index >= cols.len() {
+                return false;
+            }
+            cols.remove(index)
+        };
+        let removed_status = column_status(&removed);
+        let target = {
+            let cols = self.board_columns.read();
+            let t = if removed.eq_ignore_ascii_case("Backlog") {
+                cols.iter()
+                    .find(|c| !c.eq_ignore_ascii_case("Completed"))
+                    .unwrap_or(&cols[0])
+            } else {
+                cols.iter()
+                    .find(|c| c.eq_ignore_ascii_case("Backlog"))
+                    .unwrap_or(&cols[0])
+            };
+            t.clone()
+        };
+        remap_tasks(self.tasks, &removed_status, &column_status(&target));
+        true
     }
 
     pub fn total_tasks_count(&self) -> usize {

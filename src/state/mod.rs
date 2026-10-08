@@ -8,7 +8,7 @@ pub use calendar_sidebar_state::{
     init_calendar_sidebar_state, use_calendar_sidebar_state, CalendarSidebarState,
 };
 pub use overlay_state::{use_overlay_state, OverlayState};
-pub use tasks_state::{SubTask, TaskItem, TaskPriority, TaskStatus};
+pub use tasks_state::{column_status, SubTask, TaskItem, TaskPriority, TaskStatus};
 use tasks_state::initial_tasks;
 
 use crate::components::month_calendar::CalEvent;

@@ -175,6 +175,7 @@ pub fn SelectContent(props: SelectContentProps) -> Element {
     let uid = use_hook(super::popup::next_popup_id);
     let open = ctx.open;
     let effect_uid = uid.clone();
+    let listener_uid = uid.clone();
 
     use_effect(move || {
         if open() {
@@ -190,9 +191,59 @@ pub fn SelectContent(props: SelectContentProps) -> Element {
         }
     });
 
+    // Global click-outside listener
+    use_effect(move || {
+        if open() {
+            let close_id = format!("__sel_close_{}", listener_uid);
+            let js = format!(
+                r#"
+                (function() {{
+                    var handlerName = "{}";
+                    if (window[handlerName]) {{
+                        document.removeEventListener("pointerdown", window[handlerName], true);
+                    }}
+                    window[handlerName] = function(e) {{
+                        var popup = document.querySelector('[data-popup="{}"]');
+                        if (!popup) return;
+                        var content = popup.querySelector('[data-slot="select-content"]');
+                        if (!content) return;
+                        var target = e.target;
+                        if (content.contains(target)) return;
+                        var trigger = target.closest('[data-slot="select-trigger"]');
+                        if (trigger && popup.closest('[data-slot="select"]') &&
+                            popup.closest('[data-slot="select"]').contains(trigger)) return;
+                        var closeBtn = document.getElementById("{}");
+                        if (closeBtn) closeBtn.click();
+                    }};
+                    document.addEventListener("pointerdown", window[handlerName], true);
+                }})();
+                "#,
+                close_id, listener_uid, close_id
+            );
+            let _ = document::eval(&js);
+        } else {
+            let close_id = format!("__sel_close_{}", listener_uid);
+            let js = format!(
+                r#"
+                (function() {{
+                    var handlerName = "{}";
+                    if (window[handlerName]) {{
+                        document.removeEventListener("pointerdown", window[handlerName], true);
+                        delete window[handlerName];
+                    }}
+                }})();
+                "#,
+                close_id
+            );
+            let _ = document::eval(&js);
+        }
+    });
+
     if !*ctx.open.read() {
         return rsx! {};
     }
+
+    let close_btn_id = format!("__sel_close_{}", uid);
 
     let class = format!(
         "w-full min-w-[8rem] max-h-60 \
@@ -203,22 +254,18 @@ pub fn SelectContent(props: SelectContentProps) -> Element {
     );
 
     rsx! {
-        // Transparent backdrop to close dropdown on clicking outside
-        div {
-            class: "fixed inset-0 z-30 bg-transparent",
-            onmousedown: move |e| {
-                e.stop_propagation();
-                ctx.open.set(false);
-            },
-            onclick: move |e| {
-                e.stop_propagation();
+        // Hidden close button triggered by the global pointerdown listener
+        button {
+            id: close_btn_id,
+            class: "hidden",
+            onclick: move |_| {
                 ctx.open.set(false);
             },
         }
 
         div {
             "data-popup": uid,
-            class: "fixed left-0 top-0 z-30 invisible",
+            class: "fixed left-0 top-0 z-50 invisible",
 
             div {
                 "data-slot": "select-content",

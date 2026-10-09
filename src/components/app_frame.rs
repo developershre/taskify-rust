@@ -32,8 +32,14 @@ pub fn AppFrame() -> Element {
             Route::Components {} => ("components", ""),
             Route::ComponentsCalendar {} => ("components", "Calendar"),
         };
-        app_state.active_nav.set(nav.to_string());
-        app_state.selected_project.set(project.to_string());
+        let nav = nav.to_string();
+        let project = project.to_string();
+        if *app_state.active_nav.read() != nav {
+            app_state.active_nav.set(nav);
+        }
+        if *app_state.selected_project.read() != project {
+            app_state.selected_project.set(project);
+        }
     });
 
     rsx! {

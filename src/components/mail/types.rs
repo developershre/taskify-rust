@@ -15,6 +15,8 @@ pub struct Mail {
     pub date: String,
     pub read: bool,
     pub online: bool,
+    pub is_starred: bool,
+    pub folder: String,
     pub labels: Vec<MailLabel>,
 }
 
@@ -32,6 +34,7 @@ pub struct MailLabelFolder {
     pub color: &'static str,
 }
 
+#[allow(dead_code)]
 pub fn sample_folders() -> Vec<MailFolder> {
     vec![
         MailFolder {
@@ -111,9 +114,11 @@ pub fn sample_mails() -> Vec<Mail> {
                 "I think it would be helpful if we could align on the milestones for the next sprint and clarify the scope of the design review before we hand anything off to engineering.".to_string(),
                 "Let me know what time works best for you — I'm free most of the afternoon.".to_string(),
             ],
-            date: "almost 3 years ago".to_string(),
+            date: "Today, 10:30 AM".to_string(),
             read: false,
-            online: false,
+            online: true,
+            is_starred: true,
+            folder: "inbox".to_string(),
             labels: vec![
                 MailLabel {
                     name: "meeting",
@@ -140,9 +145,11 @@ pub fn sample_mails() -> Vec<Mail> {
                 "Thank you for the project update. It looks great! I've gone through the report, and the progress is impressive — the team has done an excellent job hitting the targets we set last quarter.".to_string(),
                 "I've left a couple of notes in the attached document, mostly around the timeline for phase two. Happy to discuss further whenever you're free.".to_string(),
             ],
-            date: "almost 3 years ago".to_string(),
+            date: "Yesterday, 4:15 PM".to_string(),
             read: false,
             online: false,
+            is_starred: false,
+            folder: "inbox".to_string(),
             labels: vec![
                 MailLabel {
                     name: "work",
@@ -165,9 +172,11 @@ pub fn sample_mails() -> Vec<Mail> {
                 "Any plans for the weekend? I was thinking of going hiking in the nearby mountains. It's been a while since we last caught up properly, and it would be great to get out of the city for a bit.".to_string(),
                 "Let me know if you're in — I can drive, and we can grab breakfast on the way out.".to_string(),
             ],
-            date: "over 3 years ago".to_string(),
-            read: false,
+            date: "2 days ago".to_string(),
+            read: true,
             online: false,
+            is_starred: false,
+            folder: "inbox".to_string(),
             labels: vec![MailLabel {
                 name: "personal",
                 dark: false,
@@ -184,9 +193,11 @@ pub fn sample_mails() -> Vec<Mail> {
                 "I have a question about the budget for the upcoming quarter. Specifically, I'd like to understand how much flexibility we have in the design tooling line item before we finalize the plan.".to_string(),
                 "Could we chat briefly tomorrow morning? I should be at my desk from nine.".to_string(),
             ],
-            date: "over 3 years ago".to_string(),
+            date: "3 days ago".to_string(),
             read: false,
             online: true,
+            is_starred: true,
+            folder: "inbox".to_string(),
             labels: vec![MailLabel {
                 name: "work",
                 dark: true,
@@ -203,9 +214,11 @@ pub fn sample_mails() -> Vec<Mail> {
                 "Want to grab lunch today? I heard the new place around the corner does incredible sandwiches, and I've been wanting to try it.".to_string(),
                 "I'm flexible between noon and two — just let me know what works for you.".to_string(),
             ],
-            date: "over 3 years ago".to_string(),
-            read: false,
+            date: "4 days ago".to_string(),
+            read: true,
             online: false,
+            is_starred: false,
+            folder: "inbox".to_string(),
             labels: vec![MailLabel {
                 name: "personal",
                 dark: false,
@@ -222,9 +235,11 @@ pub fn sample_mails() -> Vec<Mail> {
                 "The venue is confirmed for the 14th. I've attached the agenda — take a look before Friday so we can finalize the session timings.".to_string(),
                 "Catering will arrive at 9am, and the main hall is booked for the whole day.".to_string(),
             ],
-            date: "almost 4 years ago".to_string(),
+            date: "1 week ago".to_string(),
             read: true,
             online: false,
+            is_starred: false,
+            folder: "archive".to_string(),
             labels: vec![
                 MailLabel {
                     name: "meeting",
@@ -247,9 +262,11 @@ pub fn sample_mails() -> Vec<Mail> {
                 "Here are my notes from yesterday's review. Overall the new flows look solid, just a few edge cases around empty states and error handling we should cover before the next milestone.".to_string(),
                 "I'll prepare the updated prototypes for Monday.".to_string(),
             ],
-            date: "almost 4 years ago".to_string(),
+            date: "2 weeks ago".to_string(),
             read: true,
             online: false,
+            is_starred: true,
+            folder: "inbox".to_string(),
             labels: vec![MailLabel {
                 name: "important",
                 dark: false,
@@ -266,9 +283,11 @@ pub fn sample_mails() -> Vec<Mail> {
                 "Good news — the budget was approved! We can start allocating resources to the new initiatives right away.".to_string(),
                 "I'll send over the breakdown by end of day so everyone has visibility.".to_string(),
             ],
-            date: "over 4 years ago".to_string(),
+            date: "3 weeks ago".to_string(),
             read: true,
             online: false,
+            is_starred: false,
+            folder: "archive".to_string(),
             labels: vec![MailLabel {
                 name: "work",
                 dark: true,

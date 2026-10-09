@@ -83,6 +83,9 @@ pub struct AppState {
     pub sidebar_open: Signal<bool>,
     pub new_note_open: Signal<bool>,
     pub board_columns: Signal<Vec<String>>,
+    pub tasks_expanded: Signal<bool>,
+    pub projects_expanded: Signal<bool>,
+    pub chat_expanded: Signal<bool>,
 }
 
 impl AppState {
@@ -246,6 +249,9 @@ pub fn use_init_app_state() -> AppState {
             "Completed".to_string(),
         ]
     });
+    let tasks_expanded = use_signal(|| true);
+    let projects_expanded = use_signal(|| false);
+    let chat_expanded = use_signal(|| false);
 
     let state = AppState {
         theme,
@@ -263,6 +269,9 @@ pub fn use_init_app_state() -> AppState {
         sidebar_open,
         new_note_open,
         board_columns,
+        tasks_expanded,
+        projects_expanded,
+        chat_expanded,
     };
 
     use_context_provider(|| state);

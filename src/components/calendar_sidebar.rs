@@ -52,7 +52,7 @@ pub fn CalendarSidebar(props: CalendarSidebarProps) -> Element {
     rsx! {
         aside {
             class: format!(
-                "z-0 w-60 sm:w-72 shrink-0 rounded-2xl border border-border/40 bg-card p-4 flex flex-col h-full overflow-y-auto select-none shadow-xs gap-5 transition-all duration-300 isolate max-xl:fixed max-xl:inset-y-0 max-xl:right-0 max-xl:rounded-none max-xl:w-72 max-xl:shadow-2xl {}",
+                "w-60 sm:w-72 shrink-0 rounded-2xl border border-border/40 bg-card p-4 flex flex-col h-full overflow-y-auto select-none shadow-xs gap-5 transition-all duration-300 isolate max-xl:fixed max-xl:inset-y-0 max-xl:right-0 max-xl:rounded-none max-xl:w-72 max-xl:shadow-2xl {}",
                 props.class,
             ),
 

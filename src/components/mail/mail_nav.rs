@@ -1,7 +1,8 @@
 use dioxus::prelude::*;
 
-use super::types::{sample_folders, sample_label_folders, MailFolder, MailLabelFolder};
+use super::types::{sample_label_folders, Mail, MailFolder, MailLabelFolder};
 use crate::components::ui::{
+    Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
     DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
 };
 
@@ -9,19 +10,74 @@ use crate::components::ui::{
 pub struct MailNavProps {
     pub active_folder: String,
     pub active_label: String,
+    pub mails: Vec<Mail>,
     pub on_folder: EventHandler<String>,
     pub on_label: EventHandler<String>,
+    #[props(default)]
+    pub on_compose: Option<EventHandler<Mail>>,
 }
 
 #[component]
 pub fn MailNav(props: MailNavProps) -> Element {
     let router = router();
-    let folders = sample_folders();
     let label_folders = sample_label_folders();
     let on_folder = props.on_folder;
     let on_label = props.on_label;
     let active_folder = props.active_folder.clone();
     let active_label = props.active_label.clone();
+    let mails = props.mails.clone();
+
+    let mut compose_open = use_signal(|| false);
+    let mut to_field = use_signal(String::new);
+    let mut subject_field = use_signal(String::new);
+    let mut body_field = use_signal(String::new);
+
+    // Calculate dynamic counts
+    let inbox_count = mails.iter().filter(|m| m.folder == "inbox" && !m.read).count();
+    let drafts_count = mails.iter().filter(|m| m.folder == "drafts").count();
+    let sent_count = mails.iter().filter(|m| m.folder == "sent").count();
+    let junk_count = mails.iter().filter(|m| m.folder == "junk").count();
+    let trash_count = mails.iter().filter(|m| m.folder == "trash").count();
+    let archive_count = mails.iter().filter(|m| m.folder == "archive").count();
+    let starred_count = mails.iter().filter(|m| m.is_starred).count();
+
+    let folders = vec![
+        MailFolder {
+            id: "inbox",
+            name: "Inbox",
+            count: if inbox_count > 0 { Some(inbox_count) } else { None },
+        },
+        MailFolder {
+            id: "starred",
+            name: "Starred",
+            count: if starred_count > 0 { Some(starred_count) } else { None },
+        },
+        MailFolder {
+            id: "drafts",
+            name: "Drafts",
+            count: if drafts_count > 0 { Some(drafts_count) } else { None },
+        },
+        MailFolder {
+            id: "sent",
+            name: "Sent",
+            count: if sent_count > 0 { Some(sent_count) } else { None },
+        },
+        MailFolder {
+            id: "junk",
+            name: "Junk",
+            count: if junk_count > 0 { Some(junk_count) } else { None },
+        },
+        MailFolder {
+            id: "trash",
+            name: "Trash",
+            count: if trash_count > 0 { Some(trash_count) } else { None },
+        },
+        MailFolder {
+            id: "archive",
+            name: "Archive",
+            count: if archive_count > 0 { Some(archive_count) } else { None },
+        },
+    ];
 
     let folder_class = |active: bool| {
         if active {
@@ -40,9 +96,9 @@ pub fn MailNav(props: MailNavProps) -> Element {
     };
 
     rsx! {
-        aside { class: "w-52 shrink-0 border-r border-border/40 flex flex-col gap-4 p-3 overflow-y-auto select-none",
+        aside { class: "w-52 shrink-0 border-r border-border/40 flex flex-col gap-3 p-3 overflow-y-auto select-none",
 
-            // Account
+            // Account Dropdown
             DropdownMenu {
                 DropdownMenuTrigger {
                     class: "w-full justify-between rounded-lg px-2 py-2 text-sm font-semibold text-foreground hover:bg-muted/60 cursor-pointer",
@@ -85,13 +141,32 @@ pub fn MailNav(props: MailNavProps) -> Element {
                 }
             }
 
+            // Compose Email Button
+            button {
+                r#type: "button",
+                class: "flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground shadow-xs hover:bg-primary/90 active:scale-98 transition-all cursor-pointer",
+                onclick: move |_| compose_open.set(true),
+                svg {
+                    class: "size-3.5",
+                    view_box: "0 0 24 24",
+                    fill: "none",
+                    stroke: "currentColor",
+                    stroke_width: "2",
+                    stroke_linecap: "round",
+                    stroke_linejoin: "round",
+                    path { d: "M12 5v14" }
+                    path { d: "M5 12h14" }
+                }
+                span { "Compose" }
+            }
+
             // Folders
             nav { class: "flex flex-col gap-0.5",
                 for folder in folders.iter() {
                     { folder_row(
                         folder,
-                        count_class(active_folder == folder.id),
-                        folder_class(active_folder == folder.id),
+                        count_class(active_folder == folder.id && active_label.is_empty()),
+                        folder_class(active_folder == folder.id && active_label.is_empty()),
                         on_folder,
                     ) }
                 }
@@ -101,6 +176,9 @@ pub fn MailNav(props: MailNavProps) -> Element {
 
             // Labels
             nav { class: "flex flex-col gap-0.5",
+                div { class: "px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60",
+                    "Categories & Labels"
+                }
                 for label in label_folders.iter() {
                     { label_row(
                         label,
@@ -108,6 +186,99 @@ pub fn MailNav(props: MailNavProps) -> Element {
                         count_class(false),
                         on_label,
                     ) }
+                }
+            }
+
+            // Compose Mail Dialog
+            Dialog {
+                open: compose_open,
+                DialogContent {
+                    DialogHeader {
+                        DialogTitle { "New Message" }
+                        DialogDescription { "Draft and send an email to your team or contact." }
+                    }
+
+                    div { class: "py-3 space-y-3",
+                        div { class: "space-y-1",
+                            label { class: "text-xs font-semibold text-foreground", "To" }
+                            input {
+                                r#type: "email",
+                                class: "w-full rounded-xl border border-border bg-background px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary",
+                                placeholder: "recipient@example.com",
+                                value: to_field(),
+                                oninput: move |e| to_field.set(e.value()),
+                            }
+                        }
+
+                        div { class: "space-y-1",
+                            label { class: "text-xs font-semibold text-foreground", "Subject" }
+                            input {
+                                r#type: "text",
+                                class: "w-full rounded-xl border border-border bg-background px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary",
+                                placeholder: "Subject of your message...",
+                                value: subject_field(),
+                                oninput: move |e| subject_field.set(e.value()),
+                            }
+                        }
+
+                        div { class: "space-y-1",
+                            label { class: "text-xs font-semibold text-foreground", "Message" }
+                            textarea {
+                                class: "w-full rounded-xl border border-border bg-background p-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary resize-none",
+                                rows: "5",
+                                placeholder: "Write your message here...",
+                                value: body_field(),
+                                oninput: move |e| body_field.set(e.value()),
+                            }
+                        }
+                    }
+
+                    DialogFooter {
+                        button {
+                            r#type: "button",
+                            class: "h-8 rounded-lg border border-border px-3 text-xs font-medium text-foreground hover:bg-muted cursor-pointer",
+                            onclick: move |_| compose_open.set(false),
+                            "Discard"
+                        }
+                        button {
+                            r#type: "button",
+                            class: "h-8 rounded-lg bg-primary px-4 text-xs font-medium text-primary-foreground hover:opacity-90 cursor-pointer shadow-xs",
+                            onclick: move |_| {
+                                let to = to_field.read().trim().to_string();
+                                let subj = subject_field.read().trim().to_string();
+                                let body = body_field.read().trim().to_string();
+                                if !to.is_empty() && !subj.is_empty() {
+                                    let new_mail = Mail {
+                                        id: format!("mail-{}", std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis()).unwrap_or(0)),
+                                        name: to.split('@').next().unwrap_or(&to).to_string(),
+                                        email: to.clone(),
+                                        subject: subj.clone(),
+                                        preview: body.chars().take(80).collect::<String>(),
+                                        body: vec![body],
+                                        date: "Just now".to_string(),
+                                        read: true,
+                                        online: true,
+                                        is_starred: false,
+                                        folder: "sent".to_string(),
+                                        labels: vec![
+                                            super::types::MailLabel {
+                                                name: "work",
+                                                dark: true,
+                                            }
+                                        ],
+                                    };
+                                    if let Some(h) = &props.on_compose {
+                                        h.call(new_mail);
+                                    }
+                                    to_field.set(String::new());
+                                    subject_field.set(String::new());
+                                    body_field.set(String::new());
+                                    compose_open.set(false);
+                                }
+                            },
+                            "Send Email"
+                        }
+                    }
                 }
             }
         }

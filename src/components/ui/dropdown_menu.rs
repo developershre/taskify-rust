@@ -128,14 +128,16 @@ pub struct DropdownMenuContentProps {
 
 #[component]
 pub fn DropdownMenuContent(props: DropdownMenuContentProps) -> Element {
-    let menu = use_context::<DropdownMenuContext>();
+    let mut menu = use_context::<DropdownMenuContext>();
     let uid = use_hook(super::popup::next_popup_id);
     let open = menu.open;
     let side = props.side.clone();
     let align = props.align.clone();
     let offset = props.side_offset;
     let effect_uid = uid.clone();
+    let listener_uid = uid.clone();
 
+    // Position the popup when it opens
     use_effect(move || {
         if open() {
             super::popup::position_popup(
@@ -150,9 +152,65 @@ pub fn DropdownMenuContent(props: DropdownMenuContentProps) -> Element {
         }
     });
 
+    // Global click-outside listener using document event — avoids z-index stacking context issues
+    use_effect(move || {
+        if open() {
+            let close_id = format!("__dd_close_{}", listener_uid);
+            let js = format!(
+                r#"
+                (function() {{
+                    var handlerName = "{}";
+                    // Remove previous handler if any
+                    if (window[handlerName]) {{
+                        document.removeEventListener("pointerdown", window[handlerName], true);
+                    }}
+                    window[handlerName] = function(e) {{
+                        var popup = document.querySelector('[data-popup="{}"]');
+                        if (!popup) return;
+                        var content = popup.querySelector('[data-slot="dropdown-menu-content"]');
+                        if (!content) return;
+                        // Check if click is inside the dropdown content or a trigger
+                        var target = e.target;
+                        if (content.contains(target)) return;
+                        // Check if it's a trigger button
+                        var trigger = target.closest('[data-slot="dropdown-menu-trigger"]');
+                        if (trigger && popup.closest('[data-slot="dropdown-menu"]') &&
+                            popup.closest('[data-slot="dropdown-menu"]').contains(trigger)) return;
+                        // Click was outside — close via a synthetic event
+                        var closeBtn = document.getElementById("{}");
+                        if (closeBtn) closeBtn.click();
+                    }};
+                    // Use capture phase so we get the event before anything else
+                    document.addEventListener("pointerdown", window[handlerName], true);
+                }})();
+                "#,
+                close_id, listener_uid, close_id
+            );
+            let _ = document::eval(&js);
+        } else {
+            // Cleanup listener when closed
+            let close_id = format!("__dd_close_{}", listener_uid);
+            let js = format!(
+                r#"
+                (function() {{
+                    var handlerName = "{}";
+                    if (window[handlerName]) {{
+                        document.removeEventListener("pointerdown", window[handlerName], true);
+                        delete window[handlerName];
+                    }}
+                }})();
+                "#,
+                close_id
+            );
+            let _ = document::eval(&js);
+        }
+    });
+
     if !(menu.open)() {
         return rsx! {};
     }
+
+    let close_btn_id = format!("__dd_close_{}", uid);
 
     let classes = format!(
         "
@@ -186,26 +244,18 @@ pub fn DropdownMenuContent(props: DropdownMenuContentProps) -> Element {
     );
 
     rsx! {
-        // Transparent backdrop to close dropdown on clicking outside
-        div {
-            class: "fixed inset-0 z-30 bg-transparent",
-
-            onmousedown: move |e| {
-                e.stop_propagation();
-                let mut menu = menu;
-                menu.open.set(false);
-            },
-
-            onclick: move |e| {
-                e.stop_propagation();
-                let mut menu = menu;
+        // Hidden close button triggered by the global pointerdown listener
+        button {
+            id: close_btn_id,
+            class: "hidden",
+            onclick: move |_| {
                 menu.open.set(false);
             },
         }
 
         div {
             "data-popup": uid,
-            class: "fixed left-0 top-0 z-30 invisible",
+            class: "fixed left-0 top-0 z-50 invisible",
 
             div {
                 "data-slot": "dropdown-menu-content",

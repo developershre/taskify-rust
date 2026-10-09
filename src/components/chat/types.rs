@@ -44,6 +44,7 @@ pub struct ChatMessage {
     pub is_outgoing: bool,
     pub status: MessageStatus,
     pub content: MessageContent,
+    pub reactions: Vec<String>,
 }
 
 #[derive(Clone, PartialEq, Debug)]
@@ -54,6 +55,8 @@ pub struct ChatContact {
     pub initials: String,
     pub is_online: bool,
     pub is_group: bool,
+    pub is_pinned: bool,
+    pub is_muted: bool,
     pub last_message: String,
     pub last_message_time: String,
     pub last_message_sender: Option<String>,
@@ -70,6 +73,8 @@ pub fn sample_contacts() -> Vec<ChatContact> {
             initials: "JS".to_string(),
             is_online: true,
             is_group: false,
+            is_pinned: true,
+            is_muted: false,
             last_message: "Great! Looking forward t..".to_string(),
             last_message_time: "10 minutes".to_string(),
             last_message_sender: None,
@@ -83,6 +88,8 @@ pub fn sample_contacts() -> Vec<ChatContact> {
             initials: "NP".to_string(),
             is_online: true,
             is_group: false,
+            is_pinned: true,
+            is_muted: false,
             last_message: "Sounds perfect! I've been wa..".to_string(),
             last_message_time: "40 minutes".to_string(),
             last_message_sender: None,
@@ -96,6 +103,8 @@ pub fn sample_contacts() -> Vec<ChatContact> {
             initials: "DT".to_string(),
             is_online: false,
             is_group: true,
+            is_pinned: false,
+            is_muted: false,
             last_message: "The new mockups ar..".to_string(),
             last_message_time: "09:40".to_string(),
             last_message_sender: Some("Nickola".to_string()),
@@ -109,6 +118,8 @@ pub fn sample_contacts() -> Vec<ChatContact> {
             initials: "FH".to_string(),
             is_online: true,
             is_group: false,
+            is_pinned: false,
+            is_muted: false,
             last_message: "How about 7 PM at the new It..".to_string(),
             last_message_time: "Yesterday".to_string(),
             last_message_sender: None,
@@ -122,6 +133,8 @@ pub fn sample_contacts() -> Vec<ChatContact> {
             initials: "OP".to_string(),
             is_online: true,
             is_group: false,
+            is_pinned: false,
+            is_muted: false,
             last_message: "Hey Bonnie, yes, definitely! W..".to_string(),
             last_message_time: "13 days".to_string(),
             last_message_sender: None,
@@ -135,6 +148,8 @@ pub fn sample_contacts() -> Vec<ChatContact> {
             initials: "HN".to_string(),
             is_online: true,
             is_group: false,
+            is_pinned: false,
+            is_muted: false,
             last_message: "No worries at all! I'll grab a ta..".to_string(),
             last_message_time: "2 days".to_string(),
             last_message_sender: None,
@@ -148,6 +163,8 @@ pub fn sample_contacts() -> Vec<ChatContact> {
             initials: "WT".to_string(),
             is_online: false,
             is_group: true,
+            is_pinned: false,
+            is_muted: true,
             last_message: "I'll bring the tent".to_string(),
             last_message_time: "Yesterday".to_string(),
             last_message_sender: Some("You".to_string()),
@@ -161,6 +178,8 @@ pub fn sample_contacts() -> Vec<ChatContact> {
             initials: "ES".to_string(),
             is_online: true,
             is_group: false,
+            is_pinned: false,
+            is_muted: false,
             last_message: "She just told me today.".to_string(),
             last_message_time: "Yesterday".to_string(),
             last_message_sender: None,
@@ -174,6 +193,8 @@ pub fn sample_contacts() -> Vec<ChatContact> {
             initials: "GW".to_string(),
             is_online: true,
             is_group: false,
+            is_pinned: false,
+            is_muted: false,
             last_message: "See you in 5 minutes!".to_string(),
             last_message_time: "1 day".to_string(),
             last_message_sender: None,
@@ -187,6 +208,8 @@ pub fn sample_contacts() -> Vec<ChatContact> {
             initials: "BC".to_string(),
             is_online: true,
             is_group: false,
+            is_pinned: false,
+            is_muted: false,
             last_message: "If it takes long you can mail".to_string(),
             last_message_time: "3 hours".to_string(),
             last_message_sender: None,
@@ -200,6 +223,8 @@ pub fn sample_contacts() -> Vec<ChatContact> {
             initials: "JS".to_string(),
             is_online: true,
             is_group: false,
+            is_pinned: false,
+            is_muted: false,
             last_message: "Absolutely! It's amazing to se..".to_string(),
             last_message_time: "1 day".to_string(),
             last_message_sender: None,
@@ -213,6 +238,8 @@ pub fn sample_contacts() -> Vec<ChatContact> {
             initials: "BA".to_string(),
             is_online: true,
             is_group: false,
+            is_pinned: false,
+            is_muted: false,
             last_message: "Yeah, she mentioned it last w..".to_string(),
             last_message_time: "1 day".to_string(),
             last_message_sender: None,
@@ -237,6 +264,7 @@ pub fn sample_messages_for(contact_id: &str) -> Vec<ChatMessage> {
                     size: "50KB".to_string(),
                     url: "#".to_string(),
                 },
+                reactions: vec!["👍".to_string()],
             },
             ChatMessage {
                 id: "msg-2".to_string(),
@@ -249,6 +277,7 @@ pub fn sample_messages_for(contact_id: &str) -> Vec<ChatMessage> {
                     duration: "1:15".to_string(),
                     url: "#".to_string(),
                 },
+                reactions: vec![],
             },
             ChatMessage {
                 id: "msg-3".to_string(),
@@ -262,6 +291,7 @@ pub fn sample_messages_for(contact_id: &str) -> Vec<ChatMessage> {
                     thumbnail_url: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=600&auto=format&fit=crop&q=80".to_string(),
                     video_url: "#".to_string(),
                 },
+                reactions: vec!["🔥".to_string(), "❤️".to_string()],
             },
             ChatMessage {
                 id: "msg-4".to_string(),
@@ -291,6 +321,7 @@ pub fn sample_messages_for(contact_id: &str) -> Vec<ChatMessage> {
                     ],
                     extra_count: 2,
                 },
+                reactions: vec!["✨".to_string()],
             },
             ChatMessage {
                 id: "msg-5".to_string(),
@@ -302,6 +333,7 @@ pub fn sample_messages_for(contact_id: &str) -> Vec<ChatMessage> {
                 content: MessageContent::Text(
                     "Great! Looking forward to reviewing these mockups during our sync call.".to_string(),
                 ),
+                reactions: vec![],
             },
         ],
         "nickola" => vec![
@@ -315,6 +347,7 @@ pub fn sample_messages_for(contact_id: &str) -> Vec<ChatMessage> {
                 content: MessageContent::Text(
                     "Hey, did you have a chance to look at the revised sprint roadmap?".to_string(),
                 ),
+                reactions: vec![],
             },
             ChatMessage {
                 id: "nick-2".to_string(),
@@ -326,6 +359,7 @@ pub fn sample_messages_for(contact_id: &str) -> Vec<ChatMessage> {
                 content: MessageContent::Text(
                     "Yes, looks great! I will merge the PR this afternoon.".to_string(),
                 ),
+                reactions: vec!["👍".to_string()],
             },
             ChatMessage {
                 id: "nick-3".to_string(),
@@ -337,6 +371,7 @@ pub fn sample_messages_for(contact_id: &str) -> Vec<ChatMessage> {
                 content: MessageContent::Text(
                     "Sounds perfect! I've been waiting for this.".to_string(),
                 ),
+                reactions: vec!["🎉".to_string()],
             },
         ],
         _ => vec![
@@ -350,6 +385,7 @@ pub fn sample_messages_for(contact_id: &str) -> Vec<ChatMessage> {
                 content: MessageContent::Text(
                     "Hello! Let's catch up when you are free.".to_string(),
                 ),
+                reactions: vec![],
             },
         ],
     }

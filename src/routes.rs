@@ -15,23 +15,12 @@ pub enum Route {
     #[route("/")]
     Home {},
 
-    #[layout(TitleBar)]
-    #[layout(AppFrame)]
     #[route("/tasks", Tasks)]
     Tasks {},
-
-    #[layout(TitleBar)]
-    #[layout(AppFrame)]
     #[route("/tasks/all", TasksAll)]
     TasksAll {},
-
-    #[layout(TitleBar)]
-    #[layout(AppFrame)]
     #[route("/tasks/archived", TasksArchived)]
     TasksArchived {},
-
-    #[layout(TitleBar)]
-    #[layout(AppFrame)]
     #[route("/tasks/urgent", TasksUrgent)]
     TasksUrgent {},
 
@@ -42,8 +31,6 @@ pub enum Route {
     #[route("/projects/github", ProjectsGithub)]
     ProjectsGithub {},
 
-    #[layout(TitleBar)]
-    #[layout(AppFrame)]
     #[route("/calendar", Calendar)]
     Calendar {},
 
@@ -65,13 +52,8 @@ pub enum Route {
     #[route("/settings", Settings)]
     Settings {},
 
-    #[layout(TitleBar)]
-    #[layout(AppFrame)]
     #[route("/components", Components)]
     Components {},
-
-    #[layout(TitleBar)]
-    #[layout(AppFrame)]
     #[route("/components/calendar")]
     ComponentsCalendar {},
 }

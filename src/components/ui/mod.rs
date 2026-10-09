@@ -87,7 +87,7 @@ pub use badge::Badge;
 
 pub mod collapsible;
 #[allow(unused_imports)]
-pub use collapsible::{Collapsible, CollapsibleContent, CollapsibleTrigger};
+pub use collapsible::{Collapsible, CollapsibleContent, CollapsibleContext, CollapsibleTrigger};
 
 pub mod tabs;
 #[allow(unused_imports)]
